@@ -185,7 +185,9 @@ export function HomeScreen({
         {list.length ? (
           list.map((entry) => <TransactionRow key={entry.id} entry={entry} hide={hide} onOpen={onOpen} />)
         ) : (
-          <div className="m empty">No expenses match your search.</div>
+          <div className="m empty">
+            {query ? 'No expenses match your search.' : 'No expenses yet. Tap + to log one.'}
+          </div>
         )}
       </div>
     </div>
