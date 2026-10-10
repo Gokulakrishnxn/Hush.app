@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hush</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F2F2F4;--sf:#fff;--ink:#111114;--mut:#8A8A92;--line:#E6E6EA;--bar:#D9D9DE;--acc:#0F8A6D;--warn:#D4503A;--glass:rgba(255,255,255,.82);box-sizing:border-box}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0B0B0D;--sf:#17171A;--ink:#F5F5F7;--mut:#8E8E96;--line:#26262B;--bar:#34343A;--acc:#3CCBA6;--warn:#FF7A62;--glass:rgba(23,23,26,.82)}}
+:root[data-theme="dark"]{--bg:#0B0B0D;--sf:#17171A;--ink:#F5F5F7;--mut:#8E8E96;--line:#26262B;--bar:#34343A;--acc:#3CCBA6;--warn:#FF7A62;--glass:rgba(23,23,26,.82)}
+*{box-sizing:border-box;margin:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:Inter,Roboto,system-ui,sans-serif;display:flex;align-items:center;justify-content:center;-webkit-font-smoothing:antialiased}
+#root{width:100%;min-height:100%;display:flex;align-items:center;justify-content:center}
+button{font:inherit;color:inherit;background:none;border:0;cursor:pointer}
+button:focus-visible,input:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
+.device{position:relative;width:100%;height:100%;background:var(--bg);overflow:hidden;display:flex;flex-direction:column}
+@media(min-width:500px){.device{width:390px;height:844px;max-height:96vh;border-radius:44px;border:1px solid var(--line);box-shadow:0 30px 80px rgba(0,0,0,.14)}}
+.scroll{flex:1;overflow-y:auto;overflow-x:hidden;padding:calc(env(safe-area-inset-top,0px) + 28px) 22px 120px}
+.scroll::-webkit-scrollbar{display:none}
+.h1{font-size:34px;font-weight:700;letter-spacing:-.03em;line-height:1.1}
+.sub{color:var(--mut);font-size:15px;margin-top:6px}
+.big{font-size:56px;font-weight:600;letter-spacing:-.045em;line-height:1;margin-top:10px;font-variant-numeric:tabular-nums}
+.big small{font-size:28px;color:var(--mut);font-weight:500;letter-spacing:-.02em}
+.sec{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:34px 0 12px}
+.card{background:var(--sf);border-radius:22px;padding:6px 16px}
+.row{display:flex;align-items:center;gap:14px;padding:13px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.tile{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;flex:none;background:var(--bg)}
+.grow{flex:1;min-width:0}
+.t{font-size:16px;font-weight:500;letter-spacing:-.01em}
+.m{font-size:13px;color:var(--mut);margin-top:2px}
+.amt{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.track{height:6px;border-radius:6px;background:var(--bg);overflow:hidden;margin-top:9px}
+.fill{height:100%;border-radius:6px;background:var(--ink);transition:width .5s cubic-bezier(.2,.8,.2,1)}
+.seg{display:flex;background:var(--sf);border-radius:12px;padding:3px;margin-top:22px}
+.seg button{flex:1;padding:8px;border-radius:9px;font-size:14px;font-weight:500;color:var(--mut)}
+.seg button.on{background:var(--ink);color:var(--bg)}
+.nav{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;justify-content:space-around;padding:10px 10px calc(env(safe-area-inset-bottom,0px) + 12px);background:var(--glass);backdrop-filter:blur(24px);-webkit-backdrop-filter:blur(24px);border-top:1px solid var(--line)}
+.nb{display:flex;flex-direction:column;align-items:center;gap:4px;width:64px;font-size:11px;font-weight:500;color:var(--mut)}
+.nb.on{color:var(--ink)}
+.plus{width:56px;height:56px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;margin-top:-22px;box-shadow:0 8px 22px rgba(0,0,0,.22);transition:transform .15s}
+.plus:active{transform:scale(.92)}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.4);animation:fade .25s}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--sf);border-radius:30px 30px 0 0;padding:12px 22px calc(env(safe-area-inset-bottom,0px) + 22px);animation:up .35s cubic-bezier(.2,.8,.2,1)}
+.grab{width:38px;height:5px;border-radius:5px;background:var(--bar);margin:0 auto 16px}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:18px -22px 0;padding:0 22px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:9px 15px;border-radius:20px;background:var(--bg);font-size:14px;font-weight:500}
+.chip.on{background:var(--ink);color:var(--bg)}
+.note{width:100%;margin-top:14px;padding:13px 15px;border-radius:14px;border:0;background:var(--bg);color:var(--ink);font:inherit;font-size:15px}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);margin-top:8px}
+.pad button{padding:14px;font-size:24px;font-weight:500;border-radius:14px}
+.pad button:active{background:var(--bg)}
+.cta{width:100%;margin-top:10px;padding:16px;border-radius:16px;background:var(--acc);color:#fff;font-size:17px;font-weight:600}
+.cta:disabled{opacity:.35}
+.toast{position:absolute;left:50%;bottom:104px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:10px 18px;border-radius:20px;font-size:14px;font-weight:500;animation:up .3s}
+.av{width:76px;height:76px;border-radius:50%;background:var(--ink);color:var(--bg);display:grid;place-items:center;font-size:30px;font-weight:600}
+.sw{width:46px;height:28px;border-radius:14px;background:var(--bar);position:relative;transition:background .2s}
+.sw::after{content:"";position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;transition:transform .2s}
+.sw.on{background:var(--acc)}.sw.on::after{transform:translateX(18px)}
+.top{display:flex;justify-content:space-between;align-items:center}
+.hero{background:var(--ink);color:var(--bg);border-radius:30px;padding:22px 22px 18px;margin-top:22px;box-shadow:0 18px 40px -18px rgba(0,0,0,.45)}
+.hrow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.hero .big{font-size:42px}
+.pill{display:inline-block;margin-top:12px;padding:6px 11px;border-radius:14px;background:rgba(128,128,128,.25);font-size:12px;font-weight:500}
+.mix{display:flex;gap:3px;height:8px;margin-top:20px}.mix i{border-radius:4px;min-width:6px}
+.hfoot{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px;padding-top:14px;border-top:1px solid rgba(128,128,128,.3)}
+.hfoot span{display:block;font-size:12px;opacity:.6;margin-bottom:2px}
+.hfoot b{font-size:16px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.step{width:100%;display:flex;justify-content:space-between;align-items:center;padding-top:12px;font-size:14px;color:var(--mut)}
+.step div{display:flex;align-items:center;gap:12px}
+.step button{width:34px;height:34px;border-radius:50%;background:var(--bg);font-size:20px;color:var(--ink)}
+.step b{color:var(--ink);font-size:16px;min-width:76px;text-align:center}
+.hero .lbl{font-size:14px;opacity:.6}
+.hero .big{font-size:52px}
+.hero .tr{height:6px;border-radius:6px;background:rgba(128,128,128,.35);margin-top:20px;overflow:hidden}
+.hero .tr i{display:block;height:100%;border-radius:6px}
+.hero .ft{display:flex;justify-content:space-between;font-size:13px;margin-top:10px;opacity:.7}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);background:var(--sf);border-radius:22px;margin-top:12px;padding:16px 0}
+.stats div{text-align:center;border-right:1px solid var(--line)}.stats div:last-child{border:0}
+.stats b{display:block;font-size:17px;font-weight:600;letter-spacing:-.02em}
+.stats span{font-size:12px;color:var(--mut)}
+.sechead{margin:30px 0 12px}.sechead .sec{margin:0}
+.strip{display:flex;gap:14px;overflow-x:auto;margin:0 -22px;padding:0 22px}.strip::-webkit-scrollbar{display:none}
+.sc{flex:none;display:flex;flex-direction:column;align-items:center;gap:4px;width:64px}
+.sc .tile{width:56px;height:56px;border-radius:20px;margin-bottom:4px}
+.sc b{font-size:13px;font-weight:600}.sc span{font-size:11px;color:var(--mut)}
+.cgrid{display:flex;gap:4px;overflow-x:auto;margin:18px -22px 0;padding:0 22px}.cgrid::-webkit-scrollbar{display:none}
+.cc{flex:none;width:68px;display:flex;flex-direction:column;align-items:center;gap:6px;padding:6px 0;border-radius:14px;font-size:11px;font-weight:500;color:var(--mut)}
+.cc.on{background:var(--bg);color:var(--ink)}
+.cc.on .tile{outline:2px solid var(--ink)}
+.sheet{max-height:92%;overflow-y:auto}
+textarea.note{resize:none}
+.tx{width:100%;text-align:left}
+.nt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.link{color:var(--acc);font-size:15px;font-weight:600}
+.del{width:100%;margin-top:6px;padding:14px;font-size:16px;font-weight:600;color:var(--warn)}
+.toast{white-space:nowrap}.toast button{margin-left:14px;font-weight:700;text-decoration:underline}
+.spill{display:flex;align-items:center;gap:4px;padding:7px 12px 7px 9px;border-radius:20px;background:var(--sf);font-size:15px;font-weight:600}
+.streak{background:var(--sf);border-radius:24px;padding:16px;margin-top:12px}
+.shead{display:flex;align-items:center;gap:14px}
+.flame{width:52px;height:52px;border-radius:18px;background:#F0792B;display:grid;place-items:center;flex:none}
+.best{font-size:12px;font-weight:600;color:var(--mut);text-align:right}
+.days{display:flex;justify-content:space-between;margin-top:16px}
+.dot{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--mut)}
+.dot i{width:32px;height:32px;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+.dot i.on{background:#F0792B}
+.dot i.now:not(.on){box-shadow:inset 0 0 0 2px #F0792B}
+.tile{border-radius:22%;box-shadow:inset 0 1px 0 rgba(255,255,255,.28),0 1px 2px rgba(0,0,0,.18)}
+.sc .tile{border-radius:22%}
+.stats2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px}
+.stats2 div{background:var(--bg);border-radius:16px;padding:14px;text-align:center}
+.stats2 b{display:block;font-size:18px;font-weight:600}
+.stats2 span{font-size:12px;color:var(--mut)}
+.dpick{position:relative;display:flex;align-items:center;gap:6px;padding:9px 13px;border-radius:20px;background:var(--sf);font-size:14px;font-weight:600;overflow:hidden}
+.dpick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer}
+.dpick input::-webkit-calendar-picker-indicator{position:absolute;inset:0;width:100%;height:100%;cursor:pointer}
+.pos{color:var(--acc)}
+.device{container-type:inline-size;width:100%;max-width:440px;height:100dvh}
+@media(min-width:500px){.device{width:min(440px,100%);height:min(880px,96dvh);max-height:none}}
+@media(min-width:500px) and (max-height:560px){.device{width:100%;max-width:none;height:100dvh;border-radius:0;border:0;box-shadow:none}}
+body{min-height:100dvh}
+.scroll{width:100%;max-width:680px;margin:0 auto}
+.nav{padding-left:max(10px,calc((100% - 520px)/2));padding-right:max(10px,calc((100% - 520px)/2))}
+.hero .big{font-size:clamp(30px,10.5cqw,44px)}
+.hrow svg{width:clamp(72px,24cqw,96px);height:auto;flex:none}
+.stats b{font-size:clamp(14px,4.4cqw,17px)}
+@media(max-width:360px){.h1{font-size:30px}.big{font-size:46px}.pad button{padding:11px}.nb{width:56px}.hfoot b{font-size:14px}.sheet{padding-left:16px;padding-right:16px}.chip{padding:8px 12px}}
+@keyframes fade{from{opacity:0}}
+@keyframes up{from{transform:translateY(30px);opacity:0}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.3.1/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.3.1/umd/react-dom.production.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/htm@3.1.1/dist/htm.umd.js"></script>
+<script>
+const {useState,useMemo}=React;
+const html=htm.bind(React.createElement);
+const CUR='₹';
+let HIDE=false;
+const fmt=n=>HIDE?CUR+'••••':CUR+n.toLocaleString('en-IN',{minimumFractionDigits:0,maximumFractionDigits:2});
+const CATS={Food:{c:'#E8A33D',i:'M7 3v8M5 3v5a2 2 0 004 0V3M17 3c-2 1-3 3-3 6s1 3 3 3v9'},Transport:{c:'#4C8DF6',i:'M5 16V9l2-4h10l2 4v7M5 16h14M8 19v-3M16 19v-3'},Home:{c:'#8E6CE0',i:'M4 11l8-7 8 7v9H4z'},Fun:{c:'#E5604F',i:'M12 4l2.5 5 5.5.8-4 3.9.9 5.5-4.9-2.6-4.9 2.6.9-5.5-4-3.9 5.5-.8z'},Health:{c:'#0F8A6D',i:'M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z'},Groceries:{c:'#7DB83A',i:'M5 9h14l-1.5 9a2 2 0 01-2 1.7h-7a2 2 0 01-2-1.7zM9 9l3-5 3 5'},Bills:{c:'#2FB8A6',i:'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6'},Rent:{c:'#C2703D',i:'M5 21V4h9v17M14 9h5v12M8 8h3M8 12h3M8 16h3'},EMI:{c:'#5B6CD9',i:'M3 7h18v11H3zM3 11h18M7 15h3'},Shopping:{c:'#E26FA6',i:'M6 8h12l1 12H5zM9 8a3 3 0 016 0'},Education:{c:'#2E5AAC',i:'M2 9l10-5 10 5-10 5zM6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5'},Gifts:{c:'#D9743A',i:'M4 11h16v9H4zM3 8h18v3H3zM12 8v12M12 8C9 8 8.5 4.5 11 4.5S12 8 12 8zM12 8c3 0 3.5-3.5 1-3.5S12 8 12 8z'},Travel:{c:'#1FA2D6',i:'M21 4L3 11l7 3 3 7zM10 14l11-10'},Invest:{c:'#3E9B4F',i:'M4 17l5-5 4 4 7-8M15 8h5v5'},Other:{c:'#7A7A85',i:'M6 12h.01M12 12h.01M18 12h.01',w:3.2}};
+const BUD={Food:5000,Groceries:6000,Transport:3000,Bills:2500,Rent:14000,EMI:8000,Shopping:3000,Home:2000,Health:3000,Fun:2500,Education:2000,Travel:2000,Gifts:1500,Invest:5000,Other:1500};
+Object.entries({Food:'M6 3v5a3 3 0 006 0V3M9 3v18M17 21V3c-2.2 1.2-3 4-3 7h3',Groceries:'M3 4h2.5l2 11h10l2-8H7M9.5 20h.01M17 20h.01',Transport:'M6 17V6a2 2 0 012-2h8a2 2 0 012 2v11M6 17h12M6 17v2.5M18 17v2.5M6 11h12M8.5 14.2h.01M15.5 14.2h.01',Home:'M4 11l8-7 8 7M6 9.5V20h12V9.5M10 20v-5h4v5',Fun:'M12 3.5l2.6 5.3 5.9.9-4.3 4.1 1 5.8-5.2-2.8-5.2 2.8 1-5.8-4.3-4.1 5.9-.9z',Health:'M12 20s-7.5-4.6-7.5-10.2A4.3 4.3 0 0112 7.3a4.3 4.3 0 017.5 2.5C19.5 15.4 12 20 12 20z',Travel:'M21 3L10.5 13.5M21 3l-6.5 18-4-7.5L3 9.5z'}).forEach(([k,d])=>{CATS[k].i=d});
+const TOTAL=Object.values(BUD).reduce((a,b)=>a+b,0);
+const seed=[[0,'Filter coffee','Food',180],[0,'Metro card recharge','Transport',60],[0,'Groceries','Groceries',640],[1,'Dinner with Arjun','Food',1450,'Birthday treat at Barbeque Nation'],[1,'Auto home','Transport',320],[2,'Pharmacy','Health',460],[2,'Kurta','Shopping',1299],[3,'Movie tickets','Fun',540],[3,'Weekly groceries','Groceries',1850],[4,'Lunch','Food',290],[4,'Stationery','Other',350],[5,'Broadband bill','Bills',799],[5,'Mutual fund SIP','Invest',3000],[6,'Gym membership','Health',1500],[8,'Online course','Education',499],[8,'Books','Fun',650],[9,'Home loan EMI','EMI',7500],[10,'Weekly groceries','Groceries',2100],[9,'House rent','Rent',12000,'Paid via UPI'],[12,'Petrol','Transport',1200]].map((r,i)=>({id:i,day:r[0],t:r[1],cat:r[2],a:r[3],note:r[4]||''}));
+const I={home:'M4 11l8-7 8 7v9h-5v-6H9v6H4z',chart:'M5 20V11M12 20V5M19 20v-7',plus:'M12 5v14M5 12h14',pie:'M12 3a9 9 0 109 9h-9z M15 3.5A9 9 0 0120.5 9H15z',user:'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-4 4-6 8-6s8 2 8 6',back:'M6 6l12 12M18 6L6 18'};
+const Ic=({d,s=22,w=1.8,c='currentColor'})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" fill="none" stroke=${c} strokeWidth=${w} strokeLinecap="round" strokeLinejoin="round"><path d=${d}/></svg>`;
+const INC={Salary:{c:'#2E9E6B',i:'M3 7h18v10H3zM12 9.5a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM6.5 12h.01M17.5 12h.01'},Freelance:{c:'#3A86E8',i:'M5 6h14v9H5zM3 19h18'},Business:{c:'#8A5CD6',i:'M4 8h16v11H4zM9 8V5h6v3M4 13h16'},Interest:{c:'#E0A526',i:'M6 18L18 6M7.5 8.5h.01M16.5 15.5h.01',w:2.6},Rental:{c:'#C2703D',i:'M4 11l8-7 8 7M6 10v10h12V10M10 20v-5h4v5'},Investment:{c:'#1F8FB5',i:'M4 17l5-5 4 4 7-8M15 8h5v5'},Bonus:{c:'#E0577A',i:'M4 11h16v9H4zM3 8h18v3H3zM12 8v12M12 8C9 8 8.5 4.5 11 4.5S12 8 12 8zM12 8c3 0 3.5-3.5 1-3.5S12 8 12 8z'},Refund:{c:'#6B7FD7',i:'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3'},Misc:{c:'#7A7A85',i:'M6 12h.01M12 12h.01M18 12h.01',w:3.2}};
+const HOUSE=[['M12 3.2L3 10.6V20a1 1 0 001 1h5v-6h6v6h5a1 1 0 001-1v-9.4z','f']];
+const GIFT=[['M4.5 12h15v8a1 1 0 01-1 1h-13a1 1 0 01-1-1z','l'],['M3 8h18v4H3z','f'],['M10.8 8h2.4v13h-2.4z','f'],['M12 8C9 8 7.6 5.2 9.2 4.2S12 6 12 8zM12 8c3 0 4.4-2.8 2.8-3.8S12 6 12 8z','f']];
+const DOTS=[['M4.1 12a1.9 1.9 0 103.8 0 1.9 1.9 0 10-3.8 0zM10.1 12a1.9 1.9 0 103.8 0 1.9 1.9 0 10-3.8 0zM16.1 12a1.9 1.9 0 103.8 0 1.9 1.9 0 10-3.8 0z','f']];
+const CIRC='M12 2.8a9.2 9.2 0 100 18.4 9.2 9.2 0 000-18.4z';
+const GL={
+Food:[['M5.5 3h1.5v5h1V3h1.5v5h1V3H12v5.5a3.2 3.2 0 01-2.6 3.1L9.5 21H7.9l.1-9.4A3.2 3.2 0 015.5 8.5z','f'],['M17 3c-2.2 1.4-3.3 4-3.3 7.2H17V21h1.7V3.3z','f']],
+Groceries:[['M2.8 4.3h2.1l.9 3.2','s'],['M5 7.5h15.2l-1.7 7.6a2 2 0 01-2 1.6H8.9a2 2 0 01-2-1.5z','f'],['M7.8 20.2a1.4 1.4 0 102.8 0 1.4 1.4 0 10-2.8 0zM14.8 20.2a1.4 1.4 0 102.8 0 1.4 1.4 0 10-2.8 0z','f']],
+Transport:[['M5 5a2 2 0 012-2h10a2 2 0 012 2v12a1.5 1.5 0 01-1.5 1.5h-13A1.5 1.5 0 015 17z','f'],['M7.5 6h9v5h-9z','d'],['M7.4 14.2a1.4 1.4 0 102.8 0 1.4 1.4 0 10-2.8 0zM13.8 14.2a1.4 1.4 0 102.8 0 1.4 1.4 0 10-2.8 0z','d'],['M7 18.5h2.5V21H7zM14.5 18.5H17V21h-2.5z','f']],
+Home:HOUSE,
+Fun:[['M12 2.8l2.8 5.7 6.2.9-4.5 4.4 1.1 6.2L12 17l-5.6 3 1.1-6.2L3 9.4l6.2-.9z','f']],
+Health:[['M12 21s-8.5-5.3-8.5-11.4A4.7 4.7 0 0112 7.2a4.7 4.7 0 018.5 2.4C20.5 15.7 12 21 12 21z','f'],['M6.5 12.8h2.8l1.4-3 2.2 5.2 1.4-2.2h3.2','ds']],
+Bills:[['M6 3h12v18l-2.4-1.6L13.2 21 12 20l-1.2 1-2.4-1.6L6 21z','f'],['M9 8h6M9 11.5h6M9 15h3.5','ds']],
+Rent:[['M5 21V5a2 2 0 012-2h6a2 2 0 012 2v16z','f'],['M16 10h2a1 1 0 011 1v10h-3z','l'],['M8 6.5h1.8v1.8H8zM11.2 6.5H13v1.8h-1.8zM8 10.5h1.8v1.8H8zM11.2 10.5H13v1.8h-1.8zM8 14.5h1.8v1.8H8zM11.2 14.5H13v1.8h-1.8z','d']],
+EMI:[['M3 6.5A2.5 2.5 0 015.5 4h13A2.5 2.5 0 0121 6.5v11a2.5 2.5 0 01-2.5 2.5h-13A2.5 2.5 0 013 17.5z','f'],['M3 8.5h18V11H3z','d'],['M6 14.5h4v2H6z','d']],
+Shopping:[['M9 11V7.5a3 3 0 016 0V11','s'],['M5.5 8h13l1 12a1 1 0 01-1 1.1H5.5a1 1 0 01-1-1.1z','f']],
+Education:[['M12 3.5L1.8 9 12 14.5 22.2 9z','f'],['M6 12.3V16c0 1.6 2.7 3 6 3s6-1.4 6-3v-3.7l-6 3.2z','l'],['M20.8 10v5.5','s']],
+Gifts:GIFT,
+Travel:[['M21 3.5L2.8 10.6l6.4 2.6 2.6 6.4z','f'],['M9.2 13.2L21 3.5','ds']],
+Invest:[['M4 14h3.5v6H4zM10.2 10h3.5v10h-3.5z','l'],['M16.4 6h3.5v14h-3.5z','f']],
+Other:DOTS,
+Salary:[['M2.5 6.5A1.5 1.5 0 014 5h16a1.5 1.5 0 011.5 1.5v11a1.5 1.5 0 01-1.5 1.5H4a1.5 1.5 0 01-1.5-1.5z','f'],['M12 8.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7z','d'],['M4.8 12a1 1 0 102 0 1 1 0 10-2 0zM17.2 12a1 1 0 102 0 1 1 0 10-2 0z','d']],
+Freelance:[['M5 5.5A1.5 1.5 0 016.5 4h11A1.5 1.5 0 0119 5.5V15H5z','f'],['M7 6h10v7H7z','d'],['M2.5 16.5h19v.5a2 2 0 01-2 2h-15a2 2 0 01-2-2z','l']],
+Business:[['M9 7V5.5A1.5 1.5 0 0110.5 4h3A1.5 1.5 0 0115 5.5V7','s'],['M3 8.5A1.5 1.5 0 014.5 7h15A1.5 1.5 0 0121 8.5V19a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 19z','f'],['M3 12.5h18V14H3z','d'],['M10.5 12h3v3h-3z','l']],
+Interest:[[CIRC,'f'],['M8.6 15.4l6.8-6.8','ds'],['M7.6 9a1.4 1.4 0 102.8 0 1.4 1.4 0 10-2.8 0zM13.6 15a1.4 1.4 0 102.8 0 1.4 1.4 0 10-2.8 0z','d']],
+Rental:HOUSE,
+Investment:[['M3.5 16.5l5.5-5.5 3.5 3.5 7-7','s'],['M14.5 6.5H21V13z','f']],
+Bonus:GIFT,
+Refund:[[CIRC,'f'],['M12.5 8L8.5 12l4 4M9 12h6a2.5 2.5 0 010 5h-1','ds']],
+Misc:DOTS};
+const Gl=({k,s})=>html`<svg width=${s} height=${s} viewBox="0 0 24 24" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">${GL[k].map((p,i)=>{const m=p[1];return html`<path key=${i} d=${p[0]} fill=${m==='f'?'#fff':m==='l'?'rgba(255,255,255,.55)':m==='d'?'rgba(0,0,0,.28)':'none'} stroke=${m==='s'?'#fff':m==='ds'?'rgba(0,0,0,.3)':'none'} strokeWidth="2"/>`})}</svg>`;
+const Tile=({cat,s=22})=>{const k=CATS[cat]||INC[cat];return html`<div className="tile" style=${{background:'linear-gradient(155deg,'+k.c+',color-mix(in srgb,'+k.c+' 70%,#000))'}}><${Gl} k=${cat} s=${s+2}/></div>`};
+const FL='M12 3c1 3.5 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 .3 1.2 1 2 2 2 0-3-1-5 1-8z';
+const streakOf=l=>{const s=new Set(l.map(e=>e.day));let n=0;for(let d=s.has(0)?0:1;s.has(d);d++)n++;return n};
+const dshort=d=>new Date(Date.now()-d*864e5).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+const iso=d=>{const x=new Date(Date.now()-d*864e5);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+const CAL='M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1zM4 10h16M8 3v4M16 3v4';
+const inM=d=>{const x=new Date(Date.now()-d*864e5),n=new Date();return x.getMonth()===n.getMonth()&&x.getFullYear()===n.getFullYear()};
+const dayLbl=d=>d===0?'Today':d===1?'Yesterday':new Date(Date.now()-d*864e5).toLocaleDateString('en-IN',{day:'numeric',month:'short'});
+const Tx=({e,open})=>html`<button className="row tx" onClick=${()=>open(e)}><${Tile} cat=${e.cat}/><div className="grow"><div className="t">${e.t}</div><div className="m">${dayLbl(e.day)} · ${e.cat}</div></div><div className=${'amt'+(e.type==='income'?' pos':'')}>${fmt(e.a)}</div></button>`;
+
+function Home({ex,bud,open,onStreak,name,inc}){
+  const spent=ex.filter(e=>inM(e.day)).reduce((s,e)=>s+e.a,0);
+  const TOTAL=Object.values(bud).reduce((a,b)=>a+b,0);
+  const left=TOTAL-spent, pct=Math.min(100,spent/TOTAL*100);
+  const now=new Date(), dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate(), dl=Math.max(1,dim-now.getDate()+1);
+  const today=ex.filter(e=>e.day===0).reduce((s,e)=>s+e.a,0);
+  const avg=spent/Math.max(1,now.getDate()), safe=Math.max(0,left/dl);
+  const hr=now.getHours(), hi=hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+  const [all,setAll]=useState(false),[q,setQ]=useState('');
+  const income=inc.filter(e=>inM(e.day)).reduce((s,e)=>s+e.a,0), feed=[...ex,...inc].sort((a,b)=>a.day-b.day);
+  const list=all?feed.filter(e=>(e.t+' '+e.cat).toLowerCase().includes(q.toLowerCase())):feed.slice(0,6);
+  const streak=streakOf(ex);
+  const byCat=Object.keys(CATS).map(c=>({c,v:ex.reduce((s,e)=>e.cat===c&&inM(e.day)?s+e.a:s,0)})).sort((a,b)=>b.v-a.v);
+  return html`<div className="scroll">
+    <div className="top"><div><div className="m" style=${{marginTop:0,fontSize:15}}>${hi}</div><div className="t" style=${{fontSize:22,fontWeight:700,letterSpacing:'-.02em'}}>${name||'there'}</div></div><div style=${{display:'flex',alignItems:'center',gap:10}}><button className="spill" onClick=${onStreak} aria-label="View your streak"><${Ic} d=${FL} s=${18} c="#F0792B"/>${streak}</button></div></div>
+    <div className="hero">
+      <div className="hrow">
+        <div>
+          <div className="lbl">${now.toLocaleString('en-IN',{month:'long'})} spending</div>
+          <div className="big">${fmt(Math.round(spent))}</div>
+          <div className="pill">${dl} days left · ${fmt(TOTAL)} budget</div>
+        </div>
+        <svg width="96" height="96" viewBox="0 0 96 96" role="img" aria-label=${Math.round(pct)+'% of budget used'}>
+          <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(128,128,128,.3)" strokeWidth="8"/>
+          <circle cx="48" cy="48" r="40" fill="none" stroke=${left<0?'var(--warn)':'var(--bg)'} strokeWidth="8" strokeLinecap="round" strokeDasharray=${(pct*2.5133)+' 251.33'} transform="rotate(-90 48 48)"/>
+          <text x="48" y="53" textAnchor="middle" fontSize="20" fontWeight="600" fill="currentColor" fontFamily="Inter">${Math.round(pct)}%</text>
+        </svg>
+      </div>
+      <div className="mix">${byCat.filter(x=>x.v>0).map(x=>html`<i key=${x.c} style=${{flex:x.v,background:CATS[x.c].c}}/>`)}</div>
+      <div className="hfoot"><div><span>${left>=0?'Left':'Over'}</span><b>${fmt(Math.abs(Math.round(left)))}</b></div><div><span>Today</span><b>${fmt(today)}</b></div><div><span>Safe per day</span><b>${fmt(Math.round(safe))}</b></div></div>
+    </div>
+    <div className="stats"><div><b style=${{color:'var(--acc)'}}>${fmt(Math.round(income))}</b><span>Income</span></div><div><b>${fmt(Math.round(spent))}</b><span>Expenses</span></div><div><b style=${{color:income>=spent?'var(--ink)':'var(--warn)'}}>${fmt(Math.round(income-spent))}</b><span>Balance</span></div></div>
+    <div className="sechead"><div className="sec">Categories</div></div>
+    <div className="strip">${byCat.map(x=>html`<div className="sc" key=${x.c}><${Tile} cat=${x.c} s=${26}/><b>${x.c}</b><span>${fmt(Math.round(x.v))}</span></div>`)}</div>
+    <div className="sechead" style=${{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><div className="sec">${all?'All expenses':'Recent'}</div><button className="link" onClick=${()=>{setAll(!all);setQ('')}}>${all?'Show less':'See all'}</button></div>
+    ${all&&html`<input className="note" style=${{marginTop:0,marginBottom:12}} placeholder="Search expenses" value=${q} onChange=${e=>setQ(e.target.value)}/>`}
+    <div className="card">${list.length?list.map(e=>html`<${Tx} key=${e.id} e=${e} open=${open}/>`):html`<div className="m" style=${{padding:'18px 0',textAlign:'center'}}>No expenses match your search.</div>`}</div>
+  </div>`;
+}
+
+function Analytics({ex:ex0,inc:inc0}){
+  const [mode,setMode]=useState('Week'),[end,setEnd]=useState(0);
+  const ex=useMemo(()=>ex0.map(e=>({...e,day:e.day-end})).filter(e=>e.day>=0),[ex0,end]);
+  const pickEnd=v=>{if(!v)return;const t=new Date();t.setHours(0,0,0,0);setEnd(Math.max(0,Math.round((t-new Date(v+'T00:00:00'))/864e5)))};
+  const data=useMemo(()=>{
+    if(mode==='Week'){const d=[...Array(7)].map((_,i)=>({k:['S','M','T','W','T','F','S'][new Date(Date.now()-(6-i+end)*864e5).getDay()],v:0,day:6-i}));ex.forEach(e=>{const x=d.find(z=>z.day===e.day);if(x)x.v+=e.a});return d}
+    const d=[3,2,1,0].map(w=>({k:'W'+(4-w),v:0,w}));ex.forEach(e=>{const x=d.find(z=>z.w===Math.floor(e.day/7));if(x)x.v+=e.a});return d;
+  },[ex,mode]);
+  const max=Math.max(...data.map(d=>d.v),1), top=data.findIndex(d=>d.v===max);
+  const total=data.reduce((s,d)=>s+d.v,0);
+  const bw=mode==='Week'?30:52, gap=(320-bw*data.length)/(data.length-1);
+  const win=mode==='Week'?7:28;
+  const incP=inc0.map(e=>({...e,day:e.day-end})).filter(e=>e.day>=0&&e.day<win).reduce((s,e)=>s+e.a,0);
+  const byCat=Object.keys(CATS).map(c=>({c,v:ex.reduce((s,e)=>e.cat===c&&e.day<win?s+e.a:s,0)})).sort((a,b)=>b.v-a.v);
+  const sum=byCat.reduce((s,x)=>s+x.v,0), all=sum||1;
+  const C=2*Math.PI*46; let off=0;
+  const segs=byCat.filter(x=>x.v>0).map(x=>{const l=x.v/all*C;const s={c:x.c,l,o:off};off+=l;return s});
+  const yr=new Date().getFullYear(), cmn=new Date().getMonth();
+  const PAST=[31200,28900,33400,29800,35100,30600,32800,34200,31500];
+  const PASTI=[70500,72000,68800,74200,71500,73900,70200,76100,72600];
+  const ym=[...Array(12)].map((_,m)=>({m,v:m<cmn?PAST[m]||0:0,i:m<cmn?PASTI[m]||0:0}));
+  ex0.forEach(e=>{const d=new Date(Date.now()-e.day*864e5);if(d.getFullYear()===yr)ym[d.getMonth()].v+=e.a});
+  inc0.forEach(e=>{const d=new Date(Date.now()-e.day*864e5);if(d.getFullYear()===yr)ym[d.getMonth()].i+=e.a});
+  const ymax=Math.max(...ym.map(x=>Math.max(x.v,x.i)),1), ytot=ym.reduce((s,x)=>s+x.v,0), itot=ym.reduce((s,x)=>s+x.i,0);
+  return html`<div className="scroll">
+    <div className="top"><div className="h1">Analytics</div><div style=${{display:'flex',alignItems:'center',gap:10}}>${end>0&&html`<button className="link" onClick=${()=>setEnd(0)}>Today</button>`}<label className="dpick"><${Ic} d=${CAL} s=${18}/><span>${end===0?'Today':dshort(end)}</span><input type="date" aria-label="Pick end date" max=${iso(0)} value=${iso(end)} onChange=${e=>pickEnd(e.target.value)}/></label></div></div>
+    <div className="seg">${['Week','Month'].map(m=>html`<button key=${m} className=${mode===m?'on':''} onClick=${()=>setMode(m)}>${m}</button>`)}</div>
+    <div className="big" style=${{fontSize:40}}>${fmt(Math.round(total))}</div>
+    <div className="sub">spent ${end===0?(mode==='Week'?'in the last 7 days':'in the last 4 weeks'):(mode==='Week'?'7 days':'4 weeks')+' ending '+dshort(end)}</div>
+    <div className="stats" style=${{marginTop:18}}><div><b style=${{color:'var(--acc)'}}>${fmt(Math.round(incP))}</b><span>Income</span></div><div><b>${fmt(Math.round(total))}</b><span>Expenses</span></div><div><b style=${{color:incP>=total?'var(--acc)':'var(--warn)'}}>${fmt(Math.round(Math.abs(incP-total)))}</b><span>${incP>=total?'Saved':'Over'}</span></div></div>
+    <svg viewBox="0 0 320 170" style=${{width:'100%',marginTop:22}}>
+      ${data.map((d,i)=>{const h=Math.max(4,d.v/max*130);return html`<g key=${i}><rect x=${i*(bw+gap)} y=${140-h} width=${bw} height=${h} rx="9" fill=${i===top?'var(--acc)':'var(--bar)'}/><text x=${i*(bw+gap)+bw/2} y="162" textAnchor="middle" fontSize="12" fill="var(--mut)" fontFamily="Inter">${d.k}</text></g>`})}
+    </svg>
+    <div className="sec">Spending split</div>
+    <div className="card" style=${{display:'flex',alignItems:'center',gap:18,padding:'18px 16px'}}>
+      <svg viewBox="0 0 120 120" width="132" height="132" style=${{flex:'none'}} role="img" aria-label="Spending split by category">
+        <g transform="rotate(-90 60 60)"><circle cx="60" cy="60" r="46" fill="none" stroke="var(--bar)" strokeWidth="14" opacity=".4"/>${segs.map(s=>html`<circle key=${s.c} cx="60" cy="60" r="46" fill="none" stroke=${CATS[s.c].c} strokeWidth="14" strokeDasharray=${Math.max(0,s.l-2)+' '+C} strokeDashoffset=${-s.o}/>`)}</g>
+        <text x="60" y="59" textAnchor="middle" fontSize="14" fontWeight="600" fill="var(--ink)" fontFamily="Inter">${fmt(Math.round(sum))}</text>
+        <text x="60" y="73" textAnchor="middle" fontSize="9" fill="var(--mut)" fontFamily="Inter">total</text>
+      </svg>
+      <div className="grow">${sum===0&&html`<div className="m">No spending in this period.</div>`}${byCat.filter(x=>x.v>0).slice(0,4).map(x=>html`<div key=${x.c} style=${{display:'flex',alignItems:'center',gap:8,padding:'5px 0',fontSize:13}}><i style=${{width:8,height:8,borderRadius:4,background:CATS[x.c].c}}/><span className="grow">${x.c}</span><b style=${{fontWeight:600}}>${Math.round(x.v/all*100)}%</b></div>`)}</div>
+    </div>
+    <div className="sec">Income vs expenses</div>
+    <div className="card" style=${{padding:'16px 16px 12px'}}>
+      <div style=${{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span className="m" style=${{marginTop:0}}>${yr} net saved</span><span className="amt" style=${{fontSize:20,color:itot>=ytot?'var(--acc)':'var(--warn)'}}>${fmt(Math.round(itot-ytot))}</span></div>
+      <div style=${{display:'flex',gap:16,fontSize:12,color:'var(--mut)',marginTop:8,flexWrap:'wrap'}}><span><i style=${{display:'inline-block',width:8,height:8,borderRadius:4,background:'var(--acc)',marginRight:6}}/>Income ${fmt(Math.round(itot))}</span><span><i style=${{display:'inline-block',width:8,height:8,borderRadius:4,background:'var(--bar)',marginRight:6}}/>Expenses ${fmt(Math.round(ytot))}</span></div>
+      <svg viewBox="0 0 320 150" style=${{width:'100%',marginTop:10}} role="img" aria-label="Spending by month this year">
+        ${ym.map(x=>{const h=Math.max(3,x.v/ymax*110),hi=Math.max(3,x.i/ymax*110),cur=x.m===cmn,X=x.m*26.5+1;return html`<g key=${x.m}><rect x=${X} y=${125-hi} width="10" height=${hi} rx="4" fill="var(--acc)"/><rect x=${X+11} y=${125-h} width="10" height=${h} rx="4" fill=${cur?'var(--ink)':'var(--bar)'}/><text x=${X+10.5} y="145" textAnchor="middle" fontSize="11" fill=${cur?'var(--ink)':'var(--mut)'} fontFamily="Inter">${'JFMAMJJASOND'[x.m]}</text></g>`})}
+      </svg>
+    </div>
+    <div className="sec">By category</div>
+    <div className="card">${byCat.filter(x=>x.v>0).map(x=>html`<div className="row" key=${x.c}><${Tile} cat=${x.c}/><div className="grow"><div style=${{display:'flex',justifyContent:'space-between'}}><span className="t">${x.c}</span><span className="amt">${fmt(Math.round(x.v))}</span></div><div className="track"><div className="fill" style=${{width:x.v/all*100+'%',background:CATS[x.c].c}}/></div></div></div>`)}</div>
+  </div>`;
+}
+
+function Budget({ex,bud,setBud,inc,edit}){
+  const spent=ex.filter(e=>inM(e.day)).reduce((s,e)=>s+e.a,0);
+  const TOTAL=Object.values(bud).reduce((a,b)=>a+b,0);
+  const [open,setOpen]=useState(null),[view,setView]=useState('Expenses');
+  const now=new Date(), day=now.getDate(), dim=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+  const proj=spent/day*dim, diff=TOTAL-proj, ok=diff>=0;
+  const step=(c,d)=>setBud({...bud,[c]:Math.max(500,bud[c]+d)});
+  const seg=html`<div className="seg">${['Expenses','Income'].map(m=>html`<button key=${m} className=${view===m?'on':''} onClick=${()=>setView(m)}>${m}</button>`)}</div>`;
+  if(view==='Income'){
+    const it=inc.filter(e=>inM(e.day)).reduce((s,e)=>s+e.a,0),sv=it-spent,rate=it?Math.round(sv/it*100):0;
+    const bySrc=Object.keys(INC).map(c=>({c,v:inc.reduce((s,e)=>e.cat===c&&inM(e.day)?s+e.a:s,0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+    const none=html`<div className="m" style=${{padding:'18px 0',textAlign:'center'}}>No income yet. Tap + and choose Income.</div>`;
+    return html`<div className="scroll">
+      <div className="h1">Budget</div>${seg}
+      <div className="card" style=${{marginTop:20,padding:'20px 16px'}}>
+        <div className="m" style=${{marginTop:0}}>Income this month</div>
+        <div className="big" style=${{fontSize:40,color:'var(--acc)'}}>${fmt(it)}</div>
+        <div className="track" style=${{height:10,marginTop:16}}><div className="fill" style=${{width:Math.min(100,it?spent/it*100:0)+'%',background:sv<0?'var(--warn)':'var(--ink)'}}/></div>
+        <div style=${{display:'flex',justifyContent:'space-between',marginTop:10,fontSize:13}}><span className="m" style=${{marginTop:0}}>Spent ${fmt(Math.round(spent))}</span><span style=${{fontWeight:600,color:sv<0?'var(--warn)':'var(--acc)'}}>${sv<0?'Over by '+fmt(Math.round(-sv)):'Saved '+fmt(Math.round(sv))+' · '+rate+'%'}</span></div>
+      </div>
+      <div className="sec">Sources</div>
+      <div className="card">${bySrc.length?bySrc.map(x=>html`<div className="row" key=${x.c}><${Tile} cat=${x.c}/><div className="grow"><div style=${{display:'flex',justifyContent:'space-between'}}><span className="t">${x.c}</span><span className="amt">${fmt(x.v)}</span></div><div className="track"><div className="fill" style=${{width:x.v/it*100+'%',background:INC[x.c].c}}/></div></div></div>`):none}</div>
+      <div className="sec">Income entries</div>
+      <div className="card">${inc.length?inc.map(e=>html`<${Tx} key=${e.id} e=${e} open=${edit}/>`):none}</div>
+    </div>`;
+  }
+  return html`<div className="scroll">
+    <div className="h1">Budget</div>${seg}
+    <div className="sub">${fmt(TOTAL)} a month, split by what matters to you</div>
+    <div className="card" style=${{marginTop:24,padding:'18px 16px'}}>
+      <div style=${{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span className="m" style=${{marginTop:0}}>Projected by month end</span><span className="amt" style=${{fontSize:22,color:ok?'var(--ink)':'var(--warn)'}}>${fmt(Math.round(proj))}</span></div>
+      <div className="track" style=${{height:10}}><div className="fill" style=${{width:Math.min(100,spent/TOTAL*100)+'%',background:ok?'var(--ink)':'var(--warn)'}}/></div>
+      <div className="m" style=${{color:ok?'var(--acc)':'var(--warn)',fontWeight:500}}>${ok?'On track. You should finish '+fmt(Math.round(diff))+' under budget.':'At this pace you will go '+fmt(Math.round(-diff))+' over. Trim a category below.'}</div>
+    </div>
+    <div className="sec">Categories</div>
+    <div className="m" style=${{margin:'-6px 0 12px'}}>Tap a category to change its limit.</div>
+    <div className="card">${Object.keys(bud).map(c=>{const s=ex.reduce((t,e)=>e.cat===c&&inM(e.day)?t+e.a:t,0),over=s>bud[c],o=open===c;return html`<div className="row" key=${c} style=${{flexWrap:'wrap'}}><button className="grow" style=${{display:'flex',alignItems:'center',gap:14,textAlign:'left'}} onClick=${()=>setOpen(o?null:c)} aria-expanded=${o}><${Tile} cat=${c}/><div className="grow"><div style=${{display:'flex',justifyContent:'space-between'}}><span className="t">${c}</span><span className="m" style=${{marginTop:0,color:over?'var(--warn)':'var(--mut)'}}>${fmt(Math.round(s))} of ${fmt(bud[c])}</span></div><div className="track"><div className="fill" style=${{width:Math.min(100,s/bud[c]*100)+'%',background:over?'var(--warn)':CATS[c].c}}/></div></div></button>${o&&html`<div className="step"><span>Monthly limit</span><div><button aria-label="Decrease limit" onClick=${()=>step(c,-500)}>−</button><b>${fmt(bud[c])}</b><button aria-label="Increase limit" onClick=${()=>step(c,500)}>+</button></div></div>`}</div>`})}</div>
+  </div>`;
+}
+
+const Toggle=({v,set,label})=>html`<div className="row"><div className="grow t">${label}</div><button className=${'sw'+(v?' on':'')} role="switch" aria-checked=${v} aria-label=${label} onClick=${()=>set(!v)}/></div>`;
+function Profile({ex,inc,name,setName,hide,setHide}){
+  const [rem,setRem]=useState(true),[wk,setWk]=useState(true),[al,setAl]=useState(true),[goal,setGoal]=useState(50000),[ed,setEd]=useState(false),[dark,setDark]=useState(matchMedia('(prefers-color-scheme: dark)').matches);
+  const toggleDark=v=>{setDark(v);document.documentElement.dataset.theme=v?'dark':'light'};
+  const spent=ex.reduce((s,e)=>s+e.a,0), saved=Math.max(0,inc.reduce((s,e)=>s+e.a,0)-spent), gp=Math.min(100,saved/goal*100);
+  return html`<div className="scroll">
+    <div className="h1">Profile</div>
+    <div style=${{display:'flex',alignItems:'center',gap:16,marginTop:24}}><div className="av">${(name||'G')[0].toUpperCase()}</div><div className="grow">${ed?html`<input autoFocus className="note" style=${{marginTop:0,padding:'8px 12px',fontSize:18,fontWeight:600}} value=${name} maxLength="30" aria-label="Your name" onChange=${e=>setName(e.target.value)} onBlur=${()=>setEd(false)} onKeyDown=${e=>e.key==='Enter'&&setEd(false)}/>`:html`<div className="t" style=${{fontSize:20,fontWeight:600}}>${name||'Add your name'}</div>`}<div className="m">Hush member</div></div><button className="link" onClick=${()=>setEd(!ed)}>${ed?'Done':'Edit'}</button></div>
+    <div className="stats" style=${{marginTop:22}}><div><b>${ex.length}</b><span>Expenses</span></div><div><b>${streakOf(ex)}</b><span>Day streak</span></div><div><b>${new Set(ex.map(e=>e.cat)).size}</b><span>Categories</span></div></div>
+    <div className="sec">Savings goal</div>
+    <div className="card" style=${{padding:'16px'}}>
+      <div style=${{display:'flex',justifyContent:'space-between',alignItems:'baseline'}}><span className="m" style=${{marginTop:0}}>Saved so far</span><span className="amt" style=${{fontSize:20}}>${fmt(Math.round(saved))}</span></div>
+      <div className="track" style=${{height:10}}><div className="fill" style=${{width:gp+'%',background:'var(--acc)'}}/></div>
+      <div className="step"><span>Goal</span><div><button aria-label="Lower goal" onClick=${()=>setGoal(Math.max(5000,goal-5000))}>−</button><b>${fmt(goal)}</b><button aria-label="Raise goal" onClick=${()=>setGoal(goal+5000)}>+</button></div></div>
+    </div>
+    <div className="sec">Preferences</div>
+    <div className="card"><${Toggle} label="Daily reminder" v=${rem} set=${setRem}/><${Toggle} label="Budget alerts" v=${al} set=${setAl}/><${Toggle} label="Weekly summary" v=${wk} set=${setWk}/><${Toggle} label="Hide amounts" v=${hide} set=${setHide}/><${Toggle} label="Dark appearance" v=${dark} set=${toggleDark}/></div>
+    <div className="sec">Data</div>
+    <div className="card"><div className="row"><div className="grow t">Currency</div><div className="m">INR (₹)</div></div><div className="row"><div className="grow t">Export expenses</div><div className="m">CSV</div></div><div className="row"><div className="grow t">Backup</div><div className="m">Google Drive</div></div></div>
+    <div className="sec">About</div>
+    <div className="card"><div className="row"><div className="grow t">Help and feedback</div><div className="m">›</div></div><div className="row"><div className="grow t">Privacy policy</div><div className="m">›</div></div><div className="row"><div className="grow t">Version</div><div className="m">1.0.0</div></div></div>
+  </div>`;
+}
+
+function AddSheet({init,close,save,del}){
+  const [ty,setTy]=useState(init&&init.type==='income'?'income':'expense'),[a,setA]=useState(init?String(init.a):'0'),[cat,setCat]=useState(init?init.cat:'Food'),[n,setN]=useState(init?init.t:''),[nt,setNt]=useState(init&&init.note||''),[day,setDay]=useState(init?init.day:0);
+  const ds=d=>{const x=new Date(Date.now()-d*864e5);return x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0')};
+  const pick=v=>{if(!v)return;const t=new Date();t.setHours(0,0,0,0);setDay(Math.max(0,Math.round((t-new Date(v+'T00:00:00'))/864e5)))};
+  const press=k=>setA(p=>k==='⌫'?(p.length>1?p.slice(0,-1):'0'):k==='.'?(p.includes('.')?p:p+'.'):(p==='0'?k:(p.includes('.')&&p.split('.')[1].length>=2?p:p.length>8?p:p+k)));
+  const v=parseFloat(a)||0;
+  return html`<div><div className="scrim" onClick=${close}/><div className="sheet" role="dialog" aria-label=${init?'Edit expense':'Add expense'}>
+    <div className="grab"/>
+    ${!init&&html`<div className="seg" style=${{marginTop:0,marginBottom:14,background:'var(--bg)'}}>${['expense','income'].map(t=>html`<button key=${t} className=${ty===t?'on':''} onClick=${()=>{setTy(t);setCat(t==='income'?'Salary':'Food')}}>${t==='income'?'Income':'Expense'}</button>`)}</div>`}
+    <div style=${{textAlign:'center'}}><div className="m">Amount</div><div className="big" style=${{fontSize:52,marginTop:6}}>${CUR}${a}</div></div>
+    <div className="cgrid">${Object.keys(ty==='income'?INC:CATS).map(c=>html`<button key=${c} className=${'cc'+(cat===c?' on':'')} onClick=${()=>setCat(c)} aria-pressed=${cat===c}><${Tile} cat=${c}/><span>${c}</span></button>`)}</div>
+    <input className="note" placeholder=${ty==='income'?'Where is it from?':'What was it for?'} value=${n} onChange=${e=>setN(e.target.value)}/>
+    <label className="note" style=${{display:'flex',justifyContent:'space-between',alignItems:'center'}}><span>Date</span><input type="date" max=${ds(0)} value=${ds(day)} onChange=${e=>pick(e.target.value)} style=${{background:'none',border:0,color:'inherit',font:'inherit'}}/></label>
+    <div className="pad">${['1','2','3','4','5','6','7','8','9','.','0','⌫'].map(k=>html`<button key=${k} onClick=${()=>press(k)} aria-label=${k==='⌫'?'Delete':k}>${k}</button>`)}</div>
+    <button className="cta" disabled=${!v} onClick=${()=>save({t:n.trim()||cat,cat,a:v,day,note:nt.trim(),type:ty})}>${init?'Save changes':ty==='income'?'Add income':'Add expense'}</button>${init&&html`<button className="del" onClick=${del}>Delete ${ty==='income'?'income':'expense'}</button>`}
+  </div></div>`;
+}
+
+const seedInc=[[5,'Monthly salary','Salary',65000,''],[9,'Website project','Freelance',12000,'Invoice #204'],[2,'Savings interest','Interest',860,''],[7,'Mutual fund dividend','Investment',2400,'']].map((r,i)=>({id:1000+i,day:r[0],t:r[1],cat:r[2],a:r[3],note:r[4],type:'income'}));
+
+function StreakSheet({ex,close}){
+  const lg=new Set(ex.map(e=>e.day)), streak=streakOf(ex), todayDone=lg.has(0);
+  let best=0,run=0; for(let d=0;d<=Math.max(...lg,0);d++){run=lg.has(d)?run+1:0;best=Math.max(best,run)}
+  const wk=[6,5,4,3,2,1,0].map(d=>({d,on:lg.has(d),l:['S','M','T','W','T','F','S'][new Date(Date.now()-d*864e5).getDay()]}));
+  const next=[3,7,14,30,60,100].find(m=>m>streak)||streak+30;
+  return html`<div><div className="scrim" onClick=${close}/><div className="sheet" role="dialog" aria-label="Your streak">
+    <div className="grab"/>
+    <div style=${{textAlign:'center',padding:'4px 0 6px'}}>
+      <div className="flame" style=${{width:72,height:72,borderRadius:'22%',margin:'0 auto'}}><${Ic} d=${FL} s=${40} c="#fff"/></div>
+      <div className="big" style=${{fontSize:48,marginTop:14}}>${streak}</div>
+      <div className="t" style=${{fontSize:18,fontWeight:600,marginTop:4}}>day streak</div>
+      <div className="m">${todayDone?'You logged today. Come back tomorrow to keep it going.':streak>0?'Log an expense today to keep your streak alive.':'Log an expense to start a streak.'}</div>
+    </div>
+    <div className="days">${wk.map(x=>html`<div className="dot" key=${x.d}><i className=${(x.on?'on':'')+(x.d===0?' now':'')}>${x.on&&html`<${Ic} d=${FL} s=${15} c="#fff"/>`}</i><span>${x.l}</span></div>`)}</div>
+    <div className="stats2"><div><b>${best} days</b><span>Best streak</span></div><div><b>${next-streak} days</b><span>To reach ${next}</span></div></div>
+    <button className="cta" style=${{background:'var(--ink)',color:'var(--bg)'}} onClick=${close}>Done</button>
+  </div></div>`;
+}
+
+function App(){
+  const [tab,setTab]=useState('home'),[add,setAdd]=useState(false),[ex,setEx]=useState(seed),[toast,setToast]=useState(''),[bud,setBud]=useState(BUD),[undo,setUndo]=useState(null),[sk,setSk]=useState(false),[inc,setInc]=useState(seedInc),[name,setName]=useState('Gokulakrishnan'),[hide,setHide]=useState(false);
+  HIDE=hide;
+  const note=(m,u)=>{setToast(m);setUndo(u||null);clearTimeout(window.__t);window.__t=setTimeout(()=>{setToast('');setUndo(null)},3500)};
+  const sort=l=>l.sort((a,b)=>a.day-b.day);
+  const save=e=>{const isI=e.type==='income',set=isI?setInc:setEx,list=isI?inc:ex;if(add&&add!==true){set(sort(list.map(x=>x.id===add.id?{...x,...e}:x)));note(isI?'Income updated':'Expense updated')}else{const l=sort([{...e,id:Date.now()},...list]);set(l);if(isI)note('Income added');else{const s=streakOf(l);note(e.day===0&&s>streakOf(ex)?s+'-day streak! Keep it going':'Expense added')}}setAdd(false)};
+  const del=()=>{const g=add;if(g.type==='income')setInc(inc.filter(x=>x.id!==g.id));else setEx(ex.filter(x=>x.id!==g.id));setAdd(false);note(g.type==='income'?'Income deleted':'Expense deleted',g)};
+  const T=[['home','Home',I.home],['analytics','Analytics',I.chart],null,['budget','Budget',I.pie],['profile','Profile',I.user]];
+  return html`<div className="device">
+    ${tab==='home'?html`<${Home} ex=${ex} bud=${bud} open=${setAdd} name=${name} inc=${inc} onStreak=${()=>setSk(true)}/>`:tab==='analytics'?html`<${Analytics} ex=${ex} inc=${inc}/>`:tab==='budget'?html`<${Budget} ex=${ex} bud=${bud} setBud=${setBud} inc=${inc} edit=${setAdd}/>`:html`<${Profile} ex=${ex} inc=${inc} name=${name} setName=${setName} hide=${hide} setHide=${setHide}/>`}
+    <nav className="nav" aria-label="Main">${T.map((t,i)=>t?html`<button key=${t[0]} className=${'nb'+(tab===t[0]?' on':'')} onClick=${()=>setTab(t[0])} aria-current=${tab===t[0]?'page':undefined}><${Ic} d=${t[2]} w=${tab===t[0]?2.3:1.8}/>${t[1]}</button>`:html`<button key="add" className="plus" aria-label="Add expense" onClick=${()=>setAdd(true)}><${Ic} d=${I.plus} s=${26} w=${2.2}/></button>`)}</nav>
+    ${toast&&html`<div className="toast">${toast}${undo&&html`<button onClick=${()=>{(undo.type==='income'?setInc:setEx)(l=>[undo,...l].sort((a,b)=>a.day-b.day));setUndo(null);setToast('')}}>Undo</button>`}</div>`}
+    ${add&&html`<${AddSheet} key=${add===true?'new':add.id} init=${add===true?null:add} close=${()=>setAdd(false)} save=${save} del=${del}/>`}
+    ${sk&&html`<${StreakSheet} ex=${ex} close=${()=>setSk(false)}/>`}
+  </div>`;
+}
+ReactDOM.createRoot(document.getElementById('root')).render(html`<${App}/>`);
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+node_modules
+dist
+dist-ssr
+*.local
+*.tsbuildinfo
+.DS_Store
+.idea
+.vscode/*
+!.vscode/extensions.json
+android/app/build
+android/app/.cxx
+android/.gradle
+android/local.properties
+android/captures
+android/.idea
+*.iml
+.capacitor
