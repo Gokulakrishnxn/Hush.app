@@ -58,7 +58,7 @@ export function ProfileScreen({
                 {settings.name || 'Add your name'}
               </div>
             )}
-            <div className="m">{store.session?.email ?? 'Hush member'}</div>
+            <div className="m">On this phone</div>
           </div>
           <button className="link" onClick={() => setEditing((value) => !value)}>
             {editing ? 'Done' : 'Edit'}
@@ -143,18 +143,6 @@ export function ProfileScreen({
         </div>
 
         <DataControl expenses={expenses} incomes={incomes} />
-
-        <div className="sec">Account</div>
-        <div className="card">
-          <div className="row">
-            <div className="grow t">Signed in</div>
-            <div className="m">{store.session?.provider === 'google' ? 'Google' : 'Email'}</div>
-          </div>
-          <button className="row tx" onClick={store.signOut}>
-            <div className="grow t">Sign out</div>
-            <div className="m">›</div>
-          </button>
-        </div>
 
         <div className="sec">About</div>
         <div className="card">

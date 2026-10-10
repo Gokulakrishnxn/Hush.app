@@ -1,5 +1,5 @@
 import { Capacitor } from '@capacitor/core';
-import type { Account, Entry, Session, Settings } from '@/domain/types';
+import type { Entry, Settings } from '@/domain/types';
 
 export const STORAGE_KEY = 'hush.v1';
 export const STORAGE_VERSION = 1 as const;
@@ -9,8 +9,6 @@ export interface PersistedState {
   expenses: Entry[];
   incomes: Entry[];
   settings: Settings;
-  accounts: Account[];
-  session: Session | null;
 }
 
 export interface StorageAdapter {
@@ -30,9 +28,9 @@ function parseState(raw: string | null): PersistedState | null {
     }
     const settings = parsed.settings;
     return {
-      ...parsed,
-      accounts: Array.isArray(parsed.accounts) ? parsed.accounts : [],
-      session: parsed.session ?? null,
+      version: STORAGE_VERSION,
+      expenses: parsed.expenses,
+      incomes: parsed.incomes,
       settings: {
         ...settings,
         dailyReminder: settings.dailyReminder !== false,

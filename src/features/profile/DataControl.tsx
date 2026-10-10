@@ -104,7 +104,7 @@ export function DataControl({ expenses, incomes }: { expenses: Entry[]; incomes:
               {panel === 'delete' ? (
                 <ConfirmSheet
                   title="Delete data"
-                  body="This removes every expense and income, and clears leftover budget so Left and Safe per day go back to zero. Sign-in and preferences stay. This cannot be undone."
+                  body="This removes every expense and income, and clears leftover budget so Left and Safe per day go back to zero. Preferences stay. This cannot be undone."
                   action="Delete all data"
                   onConfirm={store.clearLedger}
                   onClose={() => setPanel(null)}

@@ -1,10 +1,10 @@
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useStore } from '@/data/StoreProvider';
 import { AddSheet } from '@/features/add/AddSheet';
 import { AnalyticsScreen } from '@/features/analytics/AnalyticsScreen';
-import { AuthGate } from '@/features/auth/AuthGate';
 import { BudgetScreen } from '@/features/budget/BudgetScreen';
 import { HomeScreen } from '@/features/home/HomeScreen';
+import { NameGate } from '@/features/onboarding/NameGate';
 import { ProfileScreen } from '@/features/profile/ProfileScreen';
 import { StreakSheet } from '@/features/streak/StreakSheet';
 import type { Entry, Tab } from '@/domain/types';
@@ -17,10 +17,6 @@ export default function App() {
   const [editor, setEditor] = useState<Entry | true | null>(null);
   const [streakOpen, setStreakOpen] = useState(false);
 
-  useEffect(() => {
-    if (store.session) setTab('home');
-  }, [store.session?.accountId]);
-
   if (!store.ready) {
     return (
       <div className="device">
@@ -29,11 +25,10 @@ export default function App() {
     );
   }
 
-  if (!store.session) {
+  if (!store.settings.name.trim()) {
     return (
       <div className="device">
-        <AuthGate />
-        <Toast toast={store.toast} onUndo={store.undoDelete} />
+        <NameGate onSave={(name) => store.updateSettings({ name })} />
       </div>
     );
   }
@@ -43,39 +38,39 @@ export default function App() {
   return (
     <div className="device">
       <div key={tab} className="screen-enter">
-      {tab === 'home' ? (
-        <HomeScreen
-          expenses={store.expenses}
-          incomes={store.incomes}
-          budgets={store.settings.budgets}
-          name={store.settings.name}
-          hide={hide}
-          settings={store.settings}
-          onOpen={setEditor}
-          onStreak={() => setStreakOpen(true)}
-        />
-      ) : null}
-      {tab === 'analytics' ? (
-        <AnalyticsScreen expenses={store.expenses} incomes={store.incomes} hide={hide} />
-      ) : null}
-      {tab === 'budget' ? (
-        <BudgetScreen
-          expenses={store.expenses}
-          incomes={store.incomes}
-          budgets={store.settings.budgets}
-          hide={hide}
-          onBudget={store.changeBudget}
-          onEdit={setEditor}
-        />
-      ) : null}
-      {tab === 'profile' ? (
-        <ProfileScreen
-          expenses={store.expenses}
-          incomes={store.incomes}
-          settings={store.settings}
-          onSettings={store.updateSettings}
-        />
-      ) : null}
+        {tab === 'home' ? (
+          <HomeScreen
+            expenses={store.expenses}
+            incomes={store.incomes}
+            budgets={store.settings.budgets}
+            name={store.settings.name}
+            hide={hide}
+            settings={store.settings}
+            onOpen={setEditor}
+            onStreak={() => setStreakOpen(true)}
+          />
+        ) : null}
+        {tab === 'analytics' ? (
+          <AnalyticsScreen expenses={store.expenses} incomes={store.incomes} hide={hide} />
+        ) : null}
+        {tab === 'budget' ? (
+          <BudgetScreen
+            expenses={store.expenses}
+            incomes={store.incomes}
+            budgets={store.settings.budgets}
+            hide={hide}
+            onBudget={store.changeBudget}
+            onEdit={setEditor}
+          />
+        ) : null}
+        {tab === 'profile' ? (
+          <ProfileScreen
+            expenses={store.expenses}
+            incomes={store.incomes}
+            settings={store.settings}
+            onSettings={store.updateSettings}
+          />
+        ) : null}
       </div>
 
       <NavBar tab={tab} onTab={setTab} onAdd={() => setEditor(true)} />

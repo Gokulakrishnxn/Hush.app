@@ -36,7 +36,7 @@ const INCOME_SEED: Array<[number, string, string, number]> = [
 
 export function defaultSettings(): Settings {
   return {
-    name: 'Gokulakrishnan',
+    name: '',
     budgets: { ...DEFAULT_BUDGETS },
     savingsGoal: 50_000,
     appearance: 'system',
@@ -71,7 +71,5 @@ export function buildSeed(now = new Date()): PersistedState {
     expenses,
     incomes,
     settings: defaultSettings(),
-    accounts: [],
-    session: null,
   };
 }

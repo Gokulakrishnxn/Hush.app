@@ -45,8 +45,8 @@ const COPY: Record<
       {
         heading: 'Profile',
         body: [
-          'Edit your name, set a savings goal, and turn Hide amounts or Dark appearance on. Daily reminder, Budget alerts and Weekly summary stay on this device.',
-          'Data control lets you see what is on the phone, export a spreadsheet, reset one day, or delete every expense and income. Delete and an empty-month reset also clear leftover budget, so Left and Safe per day go back to zero. Sign out leaves your ledger on the phone.',
+          'The first screen asks your name. You can change it here. Set a savings goal, and turn Hide amounts or Dark appearance on. Daily reminder, Budget alerts and Weekly summary stay on this device.',
+          'Data control lets you see what is on the phone, export a spreadsheet, reset one day, or delete every expense and income. Delete and an empty-month reset also clear leftover budget, so Left and Safe per day go back to zero.',
         ],
       },
       {
@@ -76,15 +76,13 @@ const COPY: Record<
       {
         heading: 'What Hush stores',
         body: [
-          'On this phone Hush keeps: expenses and incomes (amount, category, title, date), category budgets, your savings goal, appearance and reminder preferences, and a local sign-in (name, email, and either a password hash or a Google email you typed).',
-          'Passwords are hashed on the device with SHA-256 and a random salt. Hush never stores the password in plain text.',
+          'On this phone Hush keeps: expenses and incomes (amount, category, title, date), category budgets, your savings goal, your name, and appearance and reminder preferences.',
         ],
       },
       {
         heading: 'What Hush does not do',
         body: [
-          'Hush does not send your ledger, budgets or sign-in to a server. It does not read SMS, UPI or bank accounts. It does not show ads or use third-party analytics.',
-          'Continue with Google remembers the Google email you enter on this phone. It does not open Google sign-in and does not contact Google.',
+          'Hush does not send your ledger or budgets to a server. It does not read SMS, UPI or bank accounts. It does not show ads or use third-party analytics. There is no login.',
         ],
       },
       {
@@ -96,14 +94,13 @@ const COPY: Record<
       {
         heading: 'How long it stays',
         body: [
-          'Data stays until you delete an entry, reset a day, delete all money data in Profile, sign out (which only ends the session), or clear the app\'s storage in Android settings. Delete also clears leftover category budgets. Clearing app data also removes preferences and local accounts. That cannot be undone.',
-          'Sign out does not wipe your money data. The same ledger is there when you sign in again on this phone.',
+          'Data stays until you delete an entry, reset a day, delete all money data in Profile, or clear the app\'s storage in Android settings. Delete also clears leftover category budgets. Clearing app data also removes preferences. That cannot be undone.',
         ],
       },
       {
         heading: 'Children',
         body: [
-          'Hush is not directed at children under 13. Do not create an account for a child with their personal details.',
+          'Hush is not directed at children under 13.',
         ],
       },
       {

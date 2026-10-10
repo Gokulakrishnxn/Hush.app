@@ -2,24 +2,6 @@ export type EntryType = 'expense' | 'income';
 
 export type Appearance = 'system' | 'light' | 'dark';
 
-export type AuthProvider = 'email' | 'google';
-
-export interface Account {
-  id: string;
-  email: string;
-  name: string;
-  provider: AuthProvider;
-  salt?: string;
-  passwordHash?: string;
-}
-
-export interface Session {
-  accountId: string;
-  email: string;
-  name: string;
-  provider: AuthProvider;
-}
-
 export interface Entry {
   id: number;
   type: EntryType;

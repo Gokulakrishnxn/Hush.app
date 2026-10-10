@@ -14,7 +14,6 @@ Hush answers one question on the first screen: *am I okay this month?* Log a pay
 
 | Screen | What it does |
 |---|---|
-| **Welcome** | Local sign-up, email sign-in, or Continue with Google (email stays on this phone) |
 | **Home** | Today’s spend, budget ring, left / month / safe per day, income vs expenses, category strip, recent entries |
 | **Add** | Expense or income, custom keypad, category tiles, title, date. Save stays off until the amount is more than zero |
 | **Analytics** | Week or 4-week view, tappable bars, spending split, income vs expenses for the year |
@@ -47,7 +46,7 @@ On a phone the app fills the screen. On a tablet or desktop it sits in a centred
 | Persistence | `localStorage` on web, `@capacitor/preferences` on device |
 | Tests | Vitest, against domain modules |
 
-No cloud account. No ads. No network calls for money data.
+No login — only a name on first open. No ads. No network calls for money data.
 
 **App id:** `com.gokulakrishnxn.hush`  
 **Version:** 1.0.0
@@ -100,7 +99,7 @@ Listing copy, Data safety answers, and the asset checklist are in [docs/PLAY_STO
 
 ## Data and privacy
 
-Hush stores entries, budgets, preferences and a local sign-in on the device only.
+Hush stores entries, budgets and preferences on the device only.
 
 v1 does **not** include bank or UPI linking, SMS reading, cloud sync, or third-party analytics.
 

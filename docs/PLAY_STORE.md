@@ -29,8 +29,7 @@ Answer the Play Data safety form as:
 
 - App does **not** collect or share user data with a server
 - Data stays on the device
-- Optional local sign-in (email or a Google email typed on the phone) is stored on the device only
-- Passwords are hashed on the device
+- No login or account
 - Export CSV is user-initiated and not uploaded by Hush
 
 ## Assets you still add in Play Console
