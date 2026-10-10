@@ -229,6 +229,7 @@ export const NAV_ICONS = {
   user: 'M12 12a4 4 0 100-8 4 4 0 000 8zM4 20c0-4 4-6 8-6s8 2 8 6',
   flame: 'M12 3c1 3.5 5 5.5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 .3 1.2 1 2 2 0-3-1-5 1-8z',
   calendar: 'M5 5h14a1 1 0 011 1v13a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1zM4 10h16M8 3v4M16 3v4',
+  chevron: 'M6 9l6 6 6-6',
 } as const;
 
 export function categoryStyle(name: string): CategoryStyle {

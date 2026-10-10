@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useStore } from '@/data/StoreProvider';
 import { AddSheet } from '@/features/add/AddSheet';
 import { AnalyticsScreen } from '@/features/analytics/AnalyticsScreen';
+import { AuthGate } from '@/features/auth/AuthGate';
 import { BudgetScreen } from '@/features/budget/BudgetScreen';
 import { HomeScreen } from '@/features/home/HomeScreen';
 import { ProfileScreen } from '@/features/profile/ProfileScreen';
@@ -16,6 +17,10 @@ export default function App() {
   const [editor, setEditor] = useState<Entry | true | null>(null);
   const [streakOpen, setStreakOpen] = useState(false);
 
+  useEffect(() => {
+    if (store.session) setTab('home');
+  }, [store.session?.accountId]);
+
   if (!store.ready) {
     return (
       <div className="device">
@@ -24,10 +29,20 @@ export default function App() {
     );
   }
 
+  if (!store.session) {
+    return (
+      <div className="device">
+        <AuthGate />
+        <Toast toast={store.toast} onUndo={store.undoDelete} />
+      </div>
+    );
+  }
+
   const hide = store.settings.hideAmounts;
 
   return (
     <div className="device">
+      <div key={tab} className="screen-enter">
       {tab === 'home' ? (
         <HomeScreen
           expenses={store.expenses}
@@ -35,6 +50,7 @@ export default function App() {
           budgets={store.settings.budgets}
           name={store.settings.name}
           hide={hide}
+          settings={store.settings}
           onOpen={setEditor}
           onStreak={() => setStreakOpen(true)}
         />
@@ -60,6 +76,7 @@ export default function App() {
           onSettings={store.updateSettings}
         />
       ) : null}
+      </div>
 
       <NavBar tab={tab} onTab={setTab} onAdd={() => setEditor(true)} />
       <Toast toast={store.toast} onUndo={store.undoDelete} />

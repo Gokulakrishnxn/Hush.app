@@ -1,4 +1,7 @@
 node_modules
+.env
+.env.*
+!.env.example
 dist
 dist-ssr
 *.local
@@ -11,6 +14,10 @@ android/app/build
 android/app/.cxx
 android/.gradle
 android/local.properties
+android/keystore.properties
+android/*.jks
+android/*.keystore
+android/app/build/outputs
 android/captures
 android/.idea
 *.iml

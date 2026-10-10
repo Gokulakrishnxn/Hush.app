@@ -2,7 +2,9 @@ import { useState } from 'react';
 import { CATEGORY_STYLES, EXPENSE_CATEGORIES, INCOME_CATEGORIES } from '@/domain/categories';
 import { inCalendarMonth, monthSnapshot, totalsByCategory } from '@/domain/ledger';
 import { formatINR } from '@/domain/money';
+import { isSameCalendarMonth, monthName, monthYear, parseISODate, toISODate } from '@/domain/dates';
 import type { Entry } from '@/domain/types';
+import { DateChip } from '@/ui/DateChip';
 import { Tile } from '@/ui/CategoryIcon';
 import { TransactionRow } from '@/ui/TransactionRow';
 
@@ -23,10 +25,35 @@ export function BudgetScreen({
 }) {
   const [view, setView] = useState<'Expenses' | 'Income'>('Expenses');
   const [open, setOpen] = useState<string | null>(null);
-  const snap = monthSnapshot(expenses, incomes, budgets);
+  const today = toISODate();
+  const [cursor, setCursor] = useState(today);
+  const ref = parseISODate(cursor);
+  const live = isSameCalendarMonth(ref);
+  const snap = monthSnapshot(expenses, incomes, budgets, ref);
   const onTrack = snap.budget - snap.projected >= 0;
-  const monthExpenses = inCalendarMonth(expenses);
-  const monthIncomes = inCalendarMonth(incomes);
+  const monthExpenses = inCalendarMonth(expenses, ref);
+  const monthIncomes = inCalendarMonth(incomes, ref);
+  const monthLabel = live ? 'This month' : monthYear(ref);
+
+  const header = (
+    <div className="top">
+      <div className="h1">Budget</div>
+      <div className="date-tools">
+        {!live ? (
+          <button className="link" onClick={() => setCursor(today)}>
+            This month
+          </button>
+        ) : null}
+        <DateChip
+          value={cursor}
+          max={today}
+          label={monthLabel}
+          ariaLabel="Pick a month"
+          onChange={setCursor}
+        />
+      </div>
+    </div>
+  );
 
   const switcher = (
     <div className="seg">
@@ -45,11 +72,11 @@ export function BudgetScreen({
 
     return (
       <div className="scroll">
-        <div className="h1">Budget</div>
+        {header}
         {switcher}
-        <div className="card" style={{ marginTop: 20, padding: '20px 16px' }}>
+        <div className="card lift" style={{ marginTop: 20, padding: '20px 16px' }}>
           <div className="m" style={{ marginTop: 0 }}>
-            Income this month
+            Income {live ? 'this month' : `in ${monthName(ref)}`}
           </div>
           <div className="big" style={{ fontSize: 40, color: 'var(--acc)' }}>
             {formatINR(snap.income, hide)}
@@ -101,26 +128,36 @@ export function BudgetScreen({
         </div>
         <div className="sec">Income entries</div>
         <div className="card">
-          {incomes.length
-            ? incomes.map((entry) => <TransactionRow key={entry.id} entry={entry} hide={hide} onOpen={onEdit} />)
+          {monthIncomes.length
+            ? monthIncomes.map((entry) => <TransactionRow key={entry.id} entry={entry} hide={hide} onOpen={onEdit} />)
             : empty}
         </div>
       </div>
     );
   }
 
+  const projectionCopy = live
+    ? onTrack
+      ? `On track. You should finish ${formatINR(Math.round(snap.budget - snap.projected), hide)} under budget.`
+      : `At this pace you will go ${formatINR(Math.round(snap.projected - snap.budget), hide)} over. Trim a category below.`
+    : snap.left >= 0
+      ? `You finished ${formatINR(Math.round(snap.left), hide)} under budget.`
+      : `You went ${formatINR(Math.round(-snap.left), hide)} over budget.`;
+
   return (
     <div className="scroll">
-      <div className="h1">Budget</div>
+      {header}
       {switcher}
-      <div className="sub">{formatINR(snap.budget, hide)} a month, split by what matters to you</div>
-      <div className="card" style={{ marginTop: 24, padding: '18px 16px' }}>
+      <div className="sub">
+        {formatINR(snap.budget, hide)} a month, split by what matters to you
+      </div>
+      <div className="card lift" style={{ marginTop: 24, padding: '18px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
           <span className="m" style={{ marginTop: 0 }}>
-            Projected by month end
+            {live ? 'Projected by month end' : `Spent in ${monthName(ref)}`}
           </span>
-          <span className="amt" style={{ fontSize: 22, color: onTrack ? 'var(--ink)' : 'var(--warn)' }}>
-            {formatINR(Math.round(snap.projected), hide)}
+          <span className="amt" style={{ fontSize: 22, color: (live ? onTrack : snap.left >= 0) ? 'var(--ink)' : 'var(--warn)' }}>
+            {formatINR(Math.round(live ? snap.projected : snap.spent), hide)}
           </span>
         </div>
         <div className="track" style={{ height: 10 }}>
@@ -128,14 +165,12 @@ export function BudgetScreen({
             className="fill"
             style={{
               width: `${Math.min(100, (snap.spent / Math.max(1, snap.budget)) * 100)}%`,
-              background: onTrack ? 'var(--ink)' : 'var(--warn)',
+              background: (live ? onTrack : snap.left >= 0) ? 'var(--ink)' : 'var(--warn)',
             }}
           />
         </div>
-        <div className="m" style={{ color: onTrack ? 'var(--acc)' : 'var(--warn)', fontWeight: 500 }}>
-          {onTrack
-            ? `On track. You should finish ${formatINR(Math.round(snap.budget - snap.projected), hide)} under budget.`
-            : `At this pace you will go ${formatINR(Math.round(snap.projected - snap.budget), hide)} over. Trim a category below.`}
+        <div className="m" style={{ color: (live ? onTrack : snap.left >= 0) ? 'var(--acc)' : 'var(--warn)', fontWeight: 500 }}>
+          {projectionCopy}
         </div>
       </div>
       <div className="sec">Categories</div>
@@ -153,7 +188,7 @@ export function BudgetScreen({
           return (
             <div className="row" key={category} style={{ flexWrap: 'wrap' }}>
               <button
-                className="grow"
+                className="grow press"
                 style={{ display: 'flex', alignItems: 'center', gap: 14, textAlign: 'left' }}
                 onClick={() => setOpen(expanded ? null : category)}
                 aria-expanded={expanded}

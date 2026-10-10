@@ -82,3 +82,30 @@ export function stepGoal(current: number, delta: number, minimum = 5000): number
 export function savedTowardGoal(expenses: readonly Entry[], incomes: readonly Entry[]): number {
   return Math.max(0, sumAmounts(incomes) - sumAmounts(expenses));
 }
+
+export function entriesOnDate(entries: readonly Entry[], iso: string): Entry[] {
+  return entries.filter((entry) => entry.date === iso);
+}
+
+export function withoutDate(entries: readonly Entry[], iso: string): Entry[] {
+  return entries.filter((entry) => entry.date !== iso);
+}
+
+export function zeroBudgets(budgets: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(Object.keys(budgets).map((key) => [key, 0]));
+}
+
+export function budgetsAfterClearing(
+  remainingExpenses: readonly Entry[],
+  budgets: Record<string, number>,
+  now = new Date(),
+): Record<string, number> {
+  if (inCalendarMonth(remainingExpenses, now).length > 0) return budgets;
+  return zeroBudgets(budgets);
+}
+
+export function activitySpan(entries: readonly Entry[]): { first?: string; last?: string } {
+  if (!entries.length) return {};
+  const dates = entries.map((entry) => entry.date).sort();
+  return { first: dates[0], last: dates[dates.length - 1] };
+}

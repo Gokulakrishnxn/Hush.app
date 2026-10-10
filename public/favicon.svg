@@ -1,4 +1,18 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
-  <rect width="64" height="64" rx="18" fill="#111114"/>
-  <path d="M32 14c2 7 10 11 10 20a10 10 0 11-20 0c0-4 2-6 4-8 .6 2.4 2 4 4 4 0-6-2-10 2-16z" fill="#F0792B"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" fill="none">
+  <defs>
+    <linearGradient id="hushLeft" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#B6FF98" />
+      <stop offset="0.55" stop-color="#70E685" />
+      <stop offset="1" stop-color="#178B55" />
+    </linearGradient>
+    <linearGradient id="hushRight" x1="0.2" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#C6FFA2" />
+      <stop offset="0.5" stop-color="#77E68D" />
+      <stop offset="1" stop-color="#188C59" />
+    </linearGradient>
+  </defs>
+  <rect x="5" y="5" width="150" height="150" rx="37" fill="#06100C" stroke="#29644B" stroke-width="2.5" />
+  <path d="M37 37 C56 44 65 57 65 77 L65 119 C48 109 38 94 37 75 Z" fill="url(#hushLeft)" />
+  <path d="M62 88 C84 79 96 59 111 43 C118 35 126 32 132 32 C132 61 126 81 112 96 C98 111 82 115 65 113 L65 94 Z" fill="url(#hushRight)" />
+  <path d="M65 89 C84 80 98 63 114 47 C104 73 91 92 65 106 Z" fill="#B0F99A" opacity="0.75" />
 </svg>

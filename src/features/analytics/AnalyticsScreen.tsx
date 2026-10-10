@@ -1,20 +1,21 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import {
   inWindow,
   MONTH_LETTERS,
+  periodBarRange,
   periodBars,
   periodSplit,
   periodWindow,
   yearSeries,
   type AnalyticsMode,
 } from '@/domain/analytics';
-import { CATEGORY_STYLES, NAV_ICONS } from '@/domain/categories';
-import { shortDate, toISODate } from '@/domain/dates';
+import { CATEGORY_STYLES } from '@/domain/categories';
+import { parseISODate, shortDate, toISODate } from '@/domain/dates';
 import { sumAmounts } from '@/domain/ledger';
 import { formatINR } from '@/domain/money';
 import type { Entry } from '@/domain/types';
+import { DateChip } from '@/ui/DateChip';
 import { Tile } from '@/ui/CategoryIcon';
-import { Icon } from '@/ui/Icon';
 
 export function AnalyticsScreen({
   expenses,
@@ -27,6 +28,7 @@ export function AnalyticsScreen({
 }) {
   const [mode, setMode] = useState<AnalyticsMode>('Week');
   const [end, setEnd] = useState(toISODate());
+  const [picked, setPicked] = useState<number | null>(null);
   const today = toISODate();
   const windowDays = periodWindow(mode);
   const periodExpenses = useMemo(() => inWindow(expenses, end, windowDays), [expenses, end, windowDays]);
@@ -56,28 +58,29 @@ export function AnalyticsScreen({
   const barWidth = mode === 'Week' ? 30 : 52;
   const gap = (320 - barWidth * bars.length) / (bars.length - 1);
   const ending = end === today;
+  const focus = picked ?? (top >= 0 && (bars[top]?.amount ?? 0) > 0 ? top : null);
+
+  useEffect(() => {
+    setPicked(null);
+  }, [mode, end]);
 
   return (
     <div className="scroll">
       <div className="top">
         <div className="h1">Analytics</div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <div className="date-tools">
           {end !== today ? (
             <button className="link" onClick={() => setEnd(today)}>
               Today
             </button>
           ) : null}
-          <label className="dpick">
-            <Icon d={NAV_ICONS.calendar} size={18} />
-            <span>{ending ? 'Today' : shortDate(end)}</span>
-            <input
-              type="date"
-              aria-label="Pick end date"
-              max={today}
-              value={end}
-              onChange={(event) => event.target.value && setEnd(event.target.value > today ? today : event.target.value)}
-            />
-          </label>
+          <DateChip
+            value={end}
+            max={today}
+            label={ending ? 'Today' : shortDate(end)}
+            ariaLabel="Pick end date"
+            onChange={setEnd}
+          />
         </div>
       </div>
 
@@ -118,25 +121,52 @@ export function AnalyticsScreen({
         </div>
       </div>
 
-      <svg viewBox="0 0 320 170" style={{ width: '100%', marginTop: 22 }}>
+      <div className="chart-caption">
+        {focus === null
+          ? total === 0
+            ? 'No spending in this period.'
+            : 'Tap a bar to see that day.'
+          : barCaption(mode, end, focus, bars[focus]?.amount ?? 0, hide)}
+      </div>
+      <svg viewBox="0 0 320 170" className="period-chart" role="img" aria-label="Spending by day">
         {bars.map((bar, index) => {
-          const height = Math.max(4, (bar.amount / max) * 130);
+          const height = bar.amount > 0 ? (bar.amount / max) * 130 : 0;
+          const x = index * (barWidth + gap);
+          const active = index === focus;
           return (
-            <g key={`${bar.key}-${index}`}>
-              <rect
-                x={index * (barWidth + gap)}
-                y={140 - height}
-                width={barWidth}
-                height={height}
-                rx="9"
-                fill={index === top ? 'var(--acc)' : 'var(--bar)'}
-              />
+            <g
+              key={`${bar.key}-${index}`}
+              className="period-bar"
+              role="button"
+              tabIndex={0}
+              aria-label={barCaption(mode, end, index, bar.amount, hide)}
+              onClick={() => setPicked(index)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault();
+                  setPicked(index);
+                }
+              }}
+            >
+              <rect x={x} y={0} width={barWidth} height={140} fill="transparent" />
+              {height > 0 ? (
+                <rect
+                  x={x}
+                  y={140 - height}
+                  width={barWidth}
+                  height={height}
+                  rx="9"
+                  style={{ fill: active ? 'var(--acc)' : 'var(--bar)' }}
+                />
+              ) : (
+                <rect x={x + 4} y={138} width={barWidth - 8} height={2} rx="1" style={{ fill: 'var(--line)' }} />
+              )}
               <text
-                x={index * (barWidth + gap) + barWidth / 2}
+                x={x + barWidth / 2}
                 y="162"
                 textAnchor="middle"
                 fontSize="12"
-                fill="var(--mut)"
+                style={{ fill: active ? 'var(--ink)' : 'var(--mut)' }}
                 fontFamily="Inter"
               >
                 {bar.key}
@@ -206,14 +236,25 @@ export function AnalyticsScreen({
         </div>
         <svg viewBox="0 0 320 150" style={{ width: '100%', marginTop: 10 }} role="img" aria-label="Spending by month this year">
           {months.map((row) => {
-            const height = Math.max(3, (row.expenses / ymax) * 110);
-            const incomeHeight = Math.max(3, (row.income / ymax) * 110);
+            const height = row.expenses > 0 ? (row.expenses / ymax) * 110 : 0;
+            const incomeHeight = row.income > 0 ? (row.income / ymax) * 110 : 0;
             const current = row.month === currentMonth;
             const x = row.month * 26.5 + 1;
             return (
               <g key={row.month}>
-                <rect x={x} y={125 - incomeHeight} width="10" height={incomeHeight} rx="4" fill="var(--acc)" />
-                <rect x={x + 11} y={125 - height} width="10" height={height} rx="4" fill={current ? 'var(--ink)' : 'var(--bar)'} />
+                {incomeHeight > 0 ? (
+                  <rect x={x} y={125 - incomeHeight} width="10" height={incomeHeight} rx="4" style={{ fill: 'var(--acc)' }} />
+                ) : null}
+                {height > 0 ? (
+                  <rect
+                    x={x + 11}
+                    y={125 - height}
+                    width="10"
+                    height={height}
+                    rx="4"
+                    style={{ fill: current ? 'var(--ink)' : 'var(--bar)' }}
+                  />
+                ) : null}
                 <text
                   x={x + 10.5}
                   y="145"
@@ -249,4 +290,14 @@ export function AnalyticsScreen({
       </div>
     </div>
   );
+}
+
+function barCaption(mode: AnalyticsMode, end: string, index: number, amount: number, hide: boolean): string {
+  const range = periodBarRange(mode, end, index);
+  const money = formatINR(Math.round(amount), hide);
+  if (mode === 'Week') {
+    const day = parseISODate(range.start).toLocaleDateString('en-IN', { weekday: 'long' });
+    return `${day} · ${money}`;
+  }
+  return `${shortDate(range.start)} – ${shortDate(range.end)} · ${money}`;
 }

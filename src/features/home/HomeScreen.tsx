@@ -1,10 +1,10 @@
 import { useState } from 'react';
 import { CATEGORY_STYLES, EXPENSE_CATEGORIES, NAV_ICONS } from '@/domain/categories';
-import { greeting, monthName } from '@/domain/dates';
-import { inCalendarMonth, mergeFeed, monthSnapshot, searchFeed, totalsByCategory } from '@/domain/ledger';
+import { addDays, greeting, monthName, toISODate } from '@/domain/dates';
+import { inCalendarMonth, mergeFeed, monthSnapshot, searchFeed, sumAmounts, totalsByCategory } from '@/domain/ledger';
 import { formatINR } from '@/domain/money';
 import { currentStreak } from '@/domain/streak';
-import type { Entry } from '@/domain/types';
+import type { Entry, Settings } from '@/domain/types';
 import { Tile } from '@/ui/CategoryIcon';
 import { Icon } from '@/ui/Icon';
 import { TransactionRow } from '@/ui/TransactionRow';
@@ -15,6 +15,7 @@ export function HomeScreen({
   budgets,
   name,
   hide,
+  settings,
   onOpen,
   onStreak,
 }: {
@@ -23,6 +24,7 @@ export function HomeScreen({
   budgets: Record<string, number>;
   name: string;
   hide: boolean;
+  settings: Settings;
   onOpen: (entry: Entry) => void;
   onStreak: () => void;
 }) {
@@ -34,6 +36,16 @@ export function HomeScreen({
   const streak = currentStreak(expenses.map((entry) => entry.date));
   const byCategory = totalsByCategory(inCalendarMonth(expenses), EXPENSE_CATEGORIES);
   const over = snap.left < 0;
+  const today = toISODate();
+  const loggedToday = expenses.some((entry) => entry.date === today);
+  const weekSpend = sumAmounts(expenses.filter((entry) => entry.date >= addDays(today, -6) && entry.date <= today));
+  const notice = settings.budgetAlerts && over
+    ? { tone: 'warn', text: 'This month is over budget. Trim a category in Budget.' }
+    : settings.dailyReminder && !loggedToday
+      ? { tone: 'soft', text: 'No expense yet today. A quick log keeps your streak.' }
+      : settings.weeklySummary
+        ? { tone: 'soft', text: `This week you spent ${formatINR(Math.round(weekSpend), hide)}.` }
+        : null;
 
   return (
     <div className="scroll">
@@ -51,12 +63,13 @@ export function HomeScreen({
           {streak}
         </button>
       </div>
+      {notice ? <div className={`notice ${notice.tone}`}>{notice.text}</div> : null}
 
       <div className="hero">
         <div className="hrow">
           <div>
-            <div className="lbl">{monthName()} spending</div>
-            <div className="big">{formatINR(Math.round(snap.spent), hide)}</div>
+            <div className="lbl">Today spending</div>
+            <div className="big">{formatINR(Math.round(snap.today), hide)}</div>
             <div className="pill">
               {snap.daysLeft} days left · {formatINR(snap.budget, hide)} budget
             </div>
@@ -66,6 +79,7 @@ export function HomeScreen({
             height="96"
             viewBox="0 0 96 96"
             role="img"
+            className="hero-ring"
             aria-label={`${Math.round(snap.budgetUsedPct)}% of budget used`}
           >
             <circle cx="48" cy="48" r="40" fill="none" stroke="rgba(128,128,128,.3)" strokeWidth="8" />
@@ -106,8 +120,8 @@ export function HomeScreen({
             <b>{formatINR(Math.abs(Math.round(snap.left)), hide)}</b>
           </div>
           <div>
-            <span>Today</span>
-            <b>{formatINR(snap.today, hide)}</b>
+            <span>{monthName()}</span>
+            <b>{formatINR(Math.round(snap.spent), hide)}</b>
           </div>
           <div>
             <span>Safe per day</span>

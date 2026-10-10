@@ -8,10 +8,16 @@ import {
   useRef,
   type ReactNode,
 } from 'react';
-import { toISODate } from '@/domain/dates';
+import { dayLabel, toISODate } from '@/domain/dates';
 import { currentStreak } from '@/domain/streak';
-import { stepBudget } from '@/domain/ledger';
-import type { Entry, Settings, Toast } from '@/domain/types';
+import { budgetsAfterClearing, stepBudget, withoutDate, zeroBudgets } from '@/domain/ledger';
+import {
+  createEmailAccount,
+  sessionFrom,
+  upsertGoogleAccount,
+  verifyEmailLogin,
+} from '@/domain/auth';
+import type { Account, Entry, Session, Settings, Toast } from '@/domain/types';
 import { applyAppearance } from '@/ui/appearance';
 import { buildSeed } from './seed';
 import { createStorage, type PersistedState, type StorageAdapter } from './storage';
@@ -29,7 +35,9 @@ type Action =
   | { type: 'restore'; entry: Entry }
   | { type: 'settings'; patch: Partial<Settings> }
   | { type: 'budget'; category: string; amount: number }
-  | { type: 'toast'; toast: Toast | null };
+  | { type: 'toast'; toast: Toast | null }
+  | { type: 'accounts'; accounts: Account[]; session: Session | null }
+  | { type: 'ledger'; expenses: Entry[]; incomes: Entry[]; budgets?: Record<string, number> };
 
 export interface Store {
   ready: boolean;
@@ -43,6 +51,14 @@ export interface Store {
   dismissToast: () => void;
   updateSettings: (patch: Partial<Settings>) => void;
   changeBudget: (category: string, delta: number) => void;
+  notify: (message: string) => void;
+  session: Session | null;
+  signUp: (input: { name: string; email: string; password: string }) => Promise<void>;
+  signIn: (input: { email: string; password: string }) => Promise<void>;
+  signInWithGoogle: (input: { email: string; name?: string }) => Promise<void>;
+  signOut: () => void;
+  clearLedger: () => void;
+  resetDate: (iso: string) => void;
 }
 
 const StoreContext = createContext<Store | null>(null);
@@ -91,6 +107,15 @@ function reducer(state: AppState, action: Action): AppState {
       };
     case 'toast':
       return { ...state, toast: action.toast };
+    case 'accounts':
+      return { ...state, accounts: action.accounts, session: action.session };
+    case 'ledger':
+      return {
+        ...state,
+        expenses: action.expenses,
+        incomes: action.incomes,
+        settings: action.budgets ? { ...state.settings, budgets: action.budgets } : state.settings,
+      };
     default:
       return state;
   }
@@ -120,6 +145,8 @@ export function StoreProvider({
     expenses: state.expenses,
     incomes: state.incomes,
     settings: state.settings,
+    accounts: state.accounts,
+    session: state.session,
   };
 
   useEffect(() => {
@@ -140,7 +167,7 @@ export function StoreProvider({
     if (!state.ready) return;
     applyAppearance(state.settings.appearance);
     void storage.write(persistable.current);
-  }, [state.ready, state.expenses, state.incomes, state.settings, storage]);
+  }, [state.ready, state.expenses, state.incomes, state.settings, state.accounts, state.session, storage]);
 
   const showToast = useCallback((toast: Toast) => {
     dispatch({ type: 'toast', toast });
@@ -201,6 +228,71 @@ export function StoreProvider({
     dispatch({ type: 'settings', patch });
   }, []);
 
+  const notify = useCallback((message: string) => {
+    showToast({ message });
+  }, [showToast]);
+
+  const signUp = useCallback(
+    async (input: { name: string; email: string; password: string }) => {
+      const account = await createEmailAccount(state.accounts, input);
+      const session = sessionFrom(account);
+      dispatch({ type: 'accounts', accounts: [...state.accounts, account], session });
+      dispatch({ type: 'settings', patch: { name: account.name } });
+      showToast({ message: 'Welcome to Hush' });
+    },
+    [showToast, state.accounts],
+  );
+
+  const signIn = useCallback(
+    async (input: { email: string; password: string }) => {
+      const account = await verifyEmailLogin(state.accounts, input);
+      dispatch({ type: 'accounts', accounts: state.accounts, session: sessionFrom(account) });
+      dispatch({ type: 'settings', patch: { name: account.name } });
+      showToast({ message: `Welcome back, ${account.name}` });
+    },
+    [showToast, state.accounts],
+  );
+
+  const signInWithGoogle = useCallback(
+    async (input: { email: string; name?: string }) => {
+      const next = upsertGoogleAccount(state.accounts, input);
+      dispatch({ type: 'accounts', accounts: next.accounts, session: sessionFrom(next.account) });
+      dispatch({ type: 'settings', patch: { name: next.account.name } });
+      showToast({ message: 'Signed in with Google' });
+    },
+    [showToast, state.accounts],
+  );
+
+  const signOut = useCallback(() => {
+    dispatch({ type: 'accounts', accounts: state.accounts, session: null });
+    showToast({ message: 'Signed out' });
+  }, [showToast, state.accounts]);
+
+  const clearLedger = useCallback(() => {
+    dispatch({
+      type: 'ledger',
+      expenses: [],
+      incomes: [],
+      budgets: zeroBudgets(state.settings.budgets),
+    });
+    showToast({ message: 'All money data deleted' });
+  }, [showToast, state.settings.budgets]);
+
+  const resetDate = useCallback(
+    (iso: string) => {
+      const expenses = withoutDate(state.expenses, iso);
+      const incomes = withoutDate(state.incomes, iso);
+      dispatch({
+        type: 'ledger',
+        expenses,
+        incomes,
+        budgets: budgetsAfterClearing(expenses, state.settings.budgets),
+      });
+      showToast({ message: `${dayLabel(iso)} reset` });
+    },
+    [showToast, state.expenses, state.incomes, state.settings.budgets],
+  );
+
   const changeBudget = useCallback(
     (category: string, delta: number) => {
       const current = state.settings.budgets[category] ?? 500;
@@ -222,6 +314,14 @@ export function StoreProvider({
       dismissToast,
       updateSettings,
       changeBudget,
+      notify,
+      session: state.session,
+      signUp,
+      signIn,
+      signInWithGoogle,
+      signOut,
+      clearLedger,
+      resetDate,
     }),
     [
       state.ready,
@@ -235,6 +335,14 @@ export function StoreProvider({
       dismissToast,
       updateSettings,
       changeBudget,
+      notify,
+      state.session,
+      signUp,
+      signIn,
+      signInWithGoogle,
+      signOut,
+      clearLedger,
+      resetDate,
     ],
   );
 

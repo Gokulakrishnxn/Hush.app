@@ -64,6 +64,14 @@ export function monthName(now = new Date()): string {
   return now.toLocaleString('en-IN', { month: 'long' });
 }
 
+export function monthYear(now = new Date()): string {
+  return now.toLocaleString('en-IN', { month: 'short', year: 'numeric' });
+}
+
+export function isSameCalendarMonth(a: Date, b = new Date()): boolean {
+  return a.getMonth() === b.getMonth() && a.getFullYear() === b.getFullYear();
+}
+
 export function weekdayLetter(iso: string): string {
   return ['S', 'M', 'T', 'W', 'T', 'F', 'S'][parseISODate(iso).getDay()];
 }
@@ -81,4 +89,12 @@ export function lastNDays(endISO: string, count: number): string[] {
 
 export function clampPastISO(iso: string, today = toISODate()): string {
   return iso > today ? today : iso;
+}
+
+export function startOfMonthISO(ref = new Date()): string {
+  return toISODate(new Date(ref.getFullYear(), ref.getMonth(), 1));
+}
+
+export function endOfMonthISO(ref = new Date()): string {
+  return toISODate(new Date(ref.getFullYear(), ref.getMonth() + 1, 0));
 }

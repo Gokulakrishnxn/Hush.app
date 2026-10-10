@@ -41,6 +41,9 @@ export function defaultSettings(): Settings {
     savingsGoal: 50_000,
     appearance: 'system',
     hideAmounts: false,
+    dailyReminder: true,
+    budgetAlerts: true,
+    weeklySummary: true,
   };
 }
 
@@ -68,5 +71,7 @@ export function buildSeed(now = new Date()): PersistedState {
     expenses,
     incomes,
     settings: defaultSettings(),
+    accounts: [],
+    session: null,
   };
 }

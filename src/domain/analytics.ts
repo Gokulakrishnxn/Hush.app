@@ -25,6 +25,20 @@ export function periodBars(expenses: readonly Entry[], mode: AnalyticsMode, endI
   });
 }
 
+export function periodBarRange(
+  mode: AnalyticsMode,
+  endISO: string,
+  index: number,
+): { start: string; end: string } {
+  if (mode === 'Week') {
+    const date = lastNDays(endISO, 7)[index] ?? endISO;
+    return { start: date, end: date };
+  }
+  const week = 3 - index;
+  const weekEnd = addDays(endISO, -(week * 7));
+  return { start: addDays(weekEnd, -6), end: weekEnd };
+}
+
 export function periodWindow(mode: AnalyticsMode): number {
   return mode === 'Week' ? 7 : 28;
 }

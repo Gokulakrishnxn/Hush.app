@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { mergeFeed, monthSnapshot, searchFeed, stepBudget } from './ledger';
+import {
+  budgetsAfterClearing,
+  mergeFeed,
+  monthSnapshot,
+  searchFeed,
+  stepBudget,
+  withoutDate,
+  zeroBudgets,
+} from './ledger';
 import type { Entry } from './types';
 
 const expense = (partial: Partial<Entry> & Pick<Entry, 'id' | 'amount' | 'date'>): Entry => ({
@@ -53,5 +61,31 @@ describe('stepBudget', () => {
   it('never drops below 500', () => {
     expect(stepBudget(500, -500)).toBe(500);
     expect(stepBudget(1000, 500)).toBe(1500);
+  });
+});
+
+describe('withoutDate', () => {
+  it('clears only that calendar day', () => {
+    const rows = [
+      expense({ id: 1, amount: 10, date: '2026-10-10' }),
+      expense({ id: 2, amount: 20, date: '2026-10-09' }),
+    ];
+    expect(withoutDate(rows, '2026-10-10').map((row) => row.id)).toEqual([2]);
+  });
+});
+
+describe('budgetsAfterClearing', () => {
+  const budgets = { Food: 5000, Rent: 14000 };
+
+  it('keeps limits when the month still has spend', () => {
+    const remaining = [expense({ id: 2, amount: 20, date: '2026-10-09' })];
+    expect(budgetsAfterClearing(remaining, budgets, new Date(2026, 9, 10))).toBe(budgets);
+  });
+
+  it('zeros leftover budget when the month is empty', () => {
+    expect(budgetsAfterClearing([], budgets, new Date(2026, 9, 10))).toEqual({ Food: 0, Rent: 0 });
+    const snap = monthSnapshot([], [], zeroBudgets(budgets), new Date(2026, 9, 10));
+    expect(snap.left).toBe(0);
+    expect(snap.safePerDay).toBe(0);
   });
 });
